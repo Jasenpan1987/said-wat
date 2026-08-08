@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# OMT private material
+docs/local/
+.omt/
+
+# Node / JS
+node_modules/
+dist/
+dist-ssr/
+
+# Rust (Tauri)
+target/
+
+# Xcode
+DerivedData/
+*.xcuserstate
+build/
+
+# Environment & secrets
+.env
+.env.local
