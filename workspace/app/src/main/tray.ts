@@ -13,7 +13,7 @@ export function createTray(iconPath: string, onOpenSettings: () => void): Tray {
   // template image, so the yellow duck shows as-is in the menu bar.
 
   const tray = new Tray(icon);
-  tray.setToolTip("said-wat");
+  // No tooltip — the builder wants just the icon, no text label on hover.
   tray.setContextMenu(
     Menu.buildFromTemplate([
       { label: "Settings…", click: () => onOpenSettings() },

@@ -15,6 +15,10 @@ const iconPath = path.join(
   import.meta.dirname,
   "../renderer/assets/tray-icon.png"
 );
+const appIconPath = path.join(
+  import.meta.dirname,
+  "../renderer/assets/app-icon.png"
+);
 
 // Dev convenience: load `MOONSHOT_API_KEY` from the repo-root `.env` before
 // anything reads the environment (no-op when the file is absent or packaged).
@@ -47,6 +51,13 @@ app.whenReady().then(() => {
   // model override flow straight into the hotkey manager and the LLM client.
   const settings = loadSettings();
   setModelOverride(settings.model);
+
+  // Dev mode has no app bundle, so the Dock/⌘Tab/About icon defaults to
+  // Electron's — pin it to the psyduck until T-013 packaging (icns).
+  if (process.platform === "darwin" && app.dock) {
+    app.dock.setIcon(appIconPath);
+  }
+
 
   tray = createTray(iconPath, () => showSettingsWindow());
   registerIpcHandlers();
