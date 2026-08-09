@@ -33,7 +33,7 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 
 ### T-004: Global hotkeys manager
 - **Type:** feature
-- **Status:** ready
+- **Status:** done (2026-08-10)
 - **Requirement:** `docs/work/said-wat/requirements.md#story-2-global-hotkeys`
 - **Code:** `workspace/app/src/main/hotkeys.ts`
 - **Description:** Register capture hotkey (default `Cmd+Shift+W`) and polish hotkey (default `Cmd+Shift+E`) via `globalShortcut`. Capture handler dispatches to the capture overlay (T-005). Polish handler is a stub until T-009 (log/notify). Key strings come from the settings store when present (defaults otherwise). Re-registration on change must be conflict-safe (unregister before register; warn and keep previous on failure). `Cmd+W` must remain untouched.

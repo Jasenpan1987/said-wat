@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from "electron";
 import path from "path";
 import { createTray } from "./tray.js";
+import { initHotkeys, stopHotkeys } from "./hotkeys.js";
 
 const iconPath = path.join(
   import.meta.dirname,
@@ -31,6 +32,12 @@ app.on("second-instance", () => {
 
 app.whenReady().then(() => {
   tray = createTray(iconPath);
+  initHotkeys({
+    // Capture overlay lands in T-005, the polish flow in T-009. Until then
+    // the hotkeys are registered but log their presses.
+    onCapture: () => console.log("[hotkeys] capture pressed (overlay arrives in T-005)"),
+    onPolish: () => console.log("[hotkeys] polish pressed (flow arrives in T-009)"),
+  });
 });
 
 // Tray-only lifecycle: closing a sticky-note popup must never take the app
@@ -44,5 +51,6 @@ app.on("window-all-closed", () => {
 app.on("before-quit", () => {
   tray?.destroy();
   tray = null;
+  stopHotkeys();
   // More cleanup hooks land here as T-005/T-006 add in-flight work.
 });
