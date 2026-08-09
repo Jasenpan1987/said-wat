@@ -3,11 +3,15 @@ import { rspack } from "@rspack/core";
 import path from "path";
 
 export default defineConfig({
-  entry: "./src/renderer/index.tsx",
+  entry: {
+    app: "./src/renderer/index.tsx",
+    overlay: "./src/renderer/overlay/index.tsx",
+  },
   output: {
     path: path.resolve(import.meta.dirname, "dist/renderer"),
-    filename: "bundle.js",
+    filename: "[name].js",
     publicPath: "./",
+    clean: true,
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
@@ -36,6 +40,13 @@ export default defineConfig({
   plugins: [
     new rspack.HtmlRspackPlugin({
       template: "./src/renderer/index.html",
+      filename: "index.html",
+      chunks: ["app"],
+    }),
+    new rspack.HtmlRspackPlugin({
+      template: "./src/renderer/overlay/overlay.html",
+      filename: "overlay.html",
+      chunks: ["overlay"],
     }),
     new rspack.CopyRspackPlugin({
       patterns: [

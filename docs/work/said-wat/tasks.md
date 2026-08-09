@@ -42,7 +42,7 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 
 ### T-005: WeChat-style capture overlay
 - **Type:** feature
-- **Status:** ready
+- **Status:** done (2026-08-10)
 - **Requirement:** `docs/work/said-wat/requirements.md#story-3-capture`
 - **Knowledge:** `docs/knowledge/architecture.md#flows`
 - **Code:** `workspace/app/src/main/capture/`

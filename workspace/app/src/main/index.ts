@@ -2,6 +2,7 @@ import { app, BrowserWindow } from "electron";
 import path from "path";
 import { createTray } from "./tray.js";
 import { initHotkeys, stopHotkeys } from "./hotkeys.js";
+import { startCapture } from "./capture/index.js";
 
 const iconPath = path.join(
   import.meta.dirname,
@@ -33,9 +34,22 @@ app.on("second-instance", () => {
 app.whenReady().then(() => {
   tray = createTray(iconPath);
   initHotkeys({
-    // Capture overlay lands in T-005, the polish flow in T-009. Until then
-    // the hotkeys are registered but log their presses.
-    onCapture: () => console.log("[hotkeys] capture pressed (overlay arrives in T-005)"),
+    onCapture: () => {
+      void startCapture()
+        .then((result) => {
+          if (result) {
+            console.log(
+              `[capture] ${result.rect.width}x${result.rect.height} PNG, ${result.base64.length} bytes`
+            );
+            // T-008 replaces this log with interpretImage.
+          } else {
+            console.log("[capture] cancelled");
+          }
+        })
+        .catch((err) => console.error("[capture] failed:", err));
+    },
+    // The polish flow arrives in T-009. Until then the hotkey is registered
+    // but logs its press.
     onPolish: () => console.log("[hotkeys] polish pressed (flow arrives in T-009)"),
   });
 });

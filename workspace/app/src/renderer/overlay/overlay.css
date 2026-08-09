@@ -1,0 +1,88 @@
+/* Capture overlay — WeChat-style dim + drag-select. */
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  cursor: crosshair;
+  background: #000;
+}
+
+.overlay .snapshot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  filter: brightness(0.45);
+  pointer-events: none;
+}
+
+.overlay .hint {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font: 12px system-ui, -apple-system, sans-serif;
+  pointer-events: none;
+}
+
+.selection {
+  position: absolute;
+  border: 1.5px solid #2f7cf6;
+  background: rgba(47, 124, 246, 0.14);
+  pointer-events: none;
+  display: none;
+}
+
+.selection-size {
+  position: absolute;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  font: 11px/1.6 system-ui, -apple-system, sans-serif;
+  padding: 1px 6px;
+  border-radius: 3px;
+  pointer-events: none;
+  white-space: nowrap;
+  display: none;
+}
+
+.toolbar {
+  position: absolute;
+  display: flex;
+  gap: 1px;
+  background: rgba(30, 30, 30, 0.92);
+  border-radius: 4px;
+  padding: 2px;
+  z-index: 10;
+}
+
+.toolbar button {
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.toolbar button:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.toolbar .confirm:hover {
+  background: #2f7cf6;
+}
