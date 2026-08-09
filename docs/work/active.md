@@ -32,10 +32,11 @@
 - Checks: `pnpm build && pnpm lint && pnpm type && pnpm test` (51 tests). Commit messages English.
 
 **Next tasks (pick with the builder):**
-1. **T-012 qa boundary review** (next): manual items accumulated — tray Quit click, note focus behaviour, real capture UX on the builder's dual monitors, judgement accuracy, settings window walk-through, **packaged-app env story (Finder-launched app has no shell env — settings API-key status would read "not set"; unresolved, surface to builder)**.
+0. **T-015 Multi-provider model support (recorded, NOT started)** — Story 10 in `requirements.md`: provider list (OpenAI/Kimi/DeepSeek/Qwen/GLM) + model dropdown + paste-API-key-in-Settings. 4 open design decisions pending builder sign-off (key storage, provider scope, non-vision model behaviour, key precedence) — see story 10 / G-004. Builder explicitly said don't start yet.
+1. **T-012 qa boundary review** (next): manual items accumulated — tray Quit click, note focus behaviour, real capture UX on the builder's dual monitors, judgement accuracy, settings window walk-through, **packaged-app env story — note: a stored API key (Story 10) would also solve this**.
 2. **T-013 Package dmg** — after qa; needs the icon + version bump chore convention.
 
-**Open questions for the builder:** judgement/warning quality feedback from real usage; G-003 (cross-capture context) stays deferred until real usage.
+**Open questions for the builder:** T-015's 4 multi-provider decisions (G-004 / story 10); judgement/warning quality feedback from real usage; G-003 (cross-capture context) stays deferred until real usage.
 
 ## Open items (gaps.md)
 

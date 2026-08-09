@@ -172,6 +172,29 @@ As the user, I want the API key read from `MOONSHOT_API_KEY` and a small setting
 **Edge cases:**
 - Key set after launch (e.g. exported in a new terminal) → retry reads the current environment; no restart required.
 
+### Story 10 — Multi-provider model support {#story-10-multi-provider}
+
+As the user, I want to pick any mainstream model provider in Settings and paste its API key there, so I'm not locked into Kimi and can switch providers without touching code or environment variables.
+
+> **Status: recorded draft — NOT yet implemented.** Four design decisions are still open (see below); the task is T-015. Do not treat this story as current behaviour.
+
+**Acceptance criteria:**
+- Settings shows a provider list (v1 scope: OpenAI / Kimi / DeepSeek / Qwen / GLM — all OpenAI-compatible, one SDK) and choosing a provider filters the model dropdown.
+- Each provider has an API-key field in Settings; a pasted key is saved securely (storage decision pending — see open decisions) and used by all LLM calls for that provider.
+- Test-connection validates the selected provider's key and base URL.
+- A stored key takes precedence; the environment-variable key (MOONSHOT_API_KEY, OPENAI_API_KEY…) remains the dev fallback when nothing is stored.
+- Capture/interpret needs a vision-capable model; a text-only model (e.g. DeepSeek) is selectable for polish/reply but capture shows a clear "当前模型不支持图片" message instead of failing silently.
+- The model list lives in one config file (`providers.ts`); adding a model = one line, no code changes elsewhere.
+- Switching provider/model applies immediately to the next call (like the current model override) and persists across restarts.
+
+**Open decisions (need builder sign-off before T-015 implementation):**
+1. Key storage: macOS Keychain via Electron `safeStorage` (recommended — also solves the packaged-app env problem) vs plaintext in settings.json.
+2. Provider scope v1: OpenAI-compatible only (recommended — one SDK, small change) vs also Anthropic/Gemini (different protocols, roughly double the work).
+3. Non-vision model + capture: clear error message (recommended) vs automatic model fallback.
+4. Key precedence: stored key wins, env fallback (recommended).
+
+**Initial model list (config-driven, exact IDs/capabilities to be verified at implementation):** OpenAI `gpt-4.1` / `gpt-4.1-mini` (vision); Kimi `kimi-k2.6` / `kimi-k2.7-code` (vision); DeepSeek `deepseek-v4-pro` / `deepseek-v4-flash` (text-only); Qwen `qwen-plus` / `qwen3-vl-plus` (vl = vision); GLM `glm-4.7` / `glm-4.6`.
+
 ## 5. Non-functional requirements
 
 - **Performance:** cold start to tray icon ≤ 5s; capture → analysis shown ≤ 15s on a typical selection (network permitting).
@@ -199,7 +222,7 @@ As the user, I want the API key read from `MOONSHOT_API_KEY` and a small setting
 - **Suggested replies** — rejected by the builder in alignment.
 - **OCR pipeline** — unnecessary; the model reads images directly.
 - **Thinking mode** — deliberately off for both tasks.
-- **Multi-provider support** — Kimi only.
+- **Multi-provider support** — ~~Kimi only~~ moved to Story 10 (2026-08-10), no longer out of scope.
 - **Standalone input window** (original scheme A) — superseded by the sticky-note draft box.
 - **Capture annotation toolbar** (pen/arrow/undo etc.) — WeChat clone covers dim + select + cancel/confirm only. ⚠️ *Call to confirm: the builder said "一模一样", which could include annotations.*
 - **Thread persistence across app restarts** — memory only (main process); threads are cleared when the app quits. Decided 2026-08-09.
@@ -208,6 +231,8 @@ As the user, I want the API key read from `MOONSHOT_API_KEY` and a small setting
 - **Cross-platform** — macOS only.
 
 ## Changelog
+
+- **1.3 (2026-08-10):** Story 10 — multi-provider model support recorded as a draft (not implemented; T-015 backlog, 4 open decisions pending builder sign-off). §8 multi-provider exclusion removed.
 
 - **1.2 (2026-08-09):** Intent-routing rules locked (§ Intent routing — trigger and language decide, never guessed); context-connection design explicitly parked as G-003 to revisit after real usage.
 - **1.1 (2026-08-09):** Story 8 — thread storage settled as main-process memory (survives note close/reopen in-session, cleared on quit, nothing on disk); Story 5 — new capture starts a fresh thread (decided); §8 — persistence-across-restart call resolved. Discussed with builder.

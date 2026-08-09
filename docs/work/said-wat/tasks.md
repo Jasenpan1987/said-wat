@@ -133,3 +133,12 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 - **Description:** After the first polish result, the note shows a feedback box (Enter sends / Shift+Enter newline — ComposeBox convention). Feedback (e.g. "语气太生硬", "需要说得更细一点") is sent together with the original + previous revision history to Kimi, which rewrites; each round appends a visible revision (feedback label + copy button). Session is in-memory, independent of the capture thread; a new Cmd+Shift+E starts fresh from the current clipboard. Failure keeps the feedback in the box; retry re-sends the last feedback.
 - **Acceptance:** feedback → revised version appears; multiple rounds accumulate; copy works per version; empty feedback → hint, no request; failure → error + retry; new Cmd+Shift+E resets the session.
 - **Blocks:** none · **Blocked by:** T-002, T-007, T-009 · **Parallel with:** none
+
+### T-015: Multi-provider model support
+- **Type:** feature
+- **Status:** backlog
+- **Requirement:** `docs/work/said-wat/requirements.md#story-10-multi-provider`
+- **Code:** `workspace/app/src/main/llm/providers.ts` (new config), `workspace/app/src/main/llm/kimi.ts` (config-driven), `workspace/app/src/main/key-store.ts` (new), settings view
+- **Description:** Provider list (OpenAI / Kimi / DeepSeek / Qwen / GLM, OpenAI-compatible) + model dropdown + API-key field + test-connection in Settings; `kimi.ts` becomes config-driven (base URL / key env / model list / vision + thinking flags); key stored per provider (storage decision pending, see story 10); vision check for capture; env key stays as dev fallback.
+- **Acceptance:** (story 10 acceptance criteria once the 4 open decisions are signed off)
+- **Blocks:** none · **Blocked by:** T-011 · **Parallel with:** none
