@@ -312,3 +312,32 @@ button.primary:hover {
 .polished {
   font-size: 14px;
 }
+
+/* ---- Interactive polish revisions (T-014) ---- */
+
+.feedback-label {
+  display: inline-block;
+  font-size: 11px;
+  color: #8a7a4a;
+  background: #f5e9b8;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin: 0 0 4px;
+}
+
+.polish-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  font-size: 12px;
+  color: #a33;
+  background: #fdeaea;
+  border-radius: 5px;
+  padding: 6px 8px;
+}
+
+.polish-error p {
+  margin: 0;
+  flex: 1;
+}

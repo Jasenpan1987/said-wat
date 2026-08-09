@@ -1,8 +1,10 @@
 import { clipboard, ipcMain } from "electron";
-import { hideNote } from "./note-window.js";
+import { getLastViewContext, hideNote } from "./note-window.js";
 import { retryLastInterpret } from "./interpret-flow.js";
 import { sendDraft } from "./reply-flow.js";
 import { getThread } from "./thread-store.js";
+import { getPolish } from "./polish-store.js";
+import { retryLastPolish, sendPolishFeedback } from "./polish-flow.js";
 import { loadSettings, saveSettings } from "./settings-store.js";
 import { getCurrentHotkeys, updateHotkeys } from "./hotkeys.js";
 import { setModelOverride, testConnection } from "./llm/kimi.js";
@@ -12,7 +14,14 @@ import { friendlyError } from "./ui-errors.js";
 /** Registers all renderer → main IPC. Called once at app ready. */
 export function registerIpcHandlers(): void {
   ipcMain.on("note-dismiss", () => hideNote());
-  ipcMain.on("note-retry", () => void retryLastInterpret());
+  ipcMain.on("note-retry", () => {
+    // The retry button routes by which flow produced the last view.
+    if (getLastViewContext()?.origin === "polish") {
+      void retryLastPolish();
+    } else {
+      void retryLastInterpret();
+    }
+  });
   ipcMain.on("note-copy", (_event, text: string) => {
     clipboard.writeText(text);
   });
@@ -20,6 +29,12 @@ export function registerIpcHandlers(): void {
     void sendDraft(draft);
   });
   ipcMain.handle("thread-get", () => getThread());
+
+  // ---- Interactive polish (T-014) ----
+  ipcMain.handle("polish-get", () => getPolish());
+  ipcMain.on("polish-feedback", (_event, feedback: string) => {
+    void sendPolishFeedback(feedback);
+  });
 
   // ---- Settings (T-011) ----
   ipcMain.handle("settings-get", () => {

@@ -25,6 +25,7 @@ import {
   parseInterpret,
   parseReply,
   polishText,
+  polishWithFeedback,
   replyWithContext,
   setModelOverride,
   testConnection,
@@ -224,6 +225,29 @@ describe("method behaviour", () => {
 
   it("polishText rejects empty input as bad-input", async () => {
     await expect(polishText("   ")).rejects.toMatchObject({ code: "bad-input" });
+  });
+
+  it("polishWithFeedback sends original + history + feedback and returns the rewrite", async () => {
+    stubResponse("  This is the warmer version.  ");
+    const result = await polishWithFeedback(
+      "this is the original",
+      [{ feedback: "", text: "This is a first pass." }],
+      "语气太生硬，改得随意一点"
+    );
+    expect(result).toBe("This is the warmer version.");
+    const params = mockCreate.mock.calls[0][0];
+    const userContent = params.messages[1].content as string;
+    expect(userContent).toContain("原文");
+    expect(userContent).toContain("this is the original");
+    expect(userContent).toContain("之前的润色过程");
+    expect(userContent).toContain("This is a first pass.");
+    expect(userContent).toContain("用户的修改意见：语气太生硬");
+  });
+
+  it("polishWithFeedback rejects empty feedback as bad-input", async () => {
+    await expect(
+      polishWithFeedback("original", [], "   ")
+    ).rejects.toMatchObject({ code: "bad-input" });
   });
 
   it("replyWithContext sends analysis + thread + draft and parses the reply", async () => {

@@ -124,3 +124,12 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 - **Description:** App icon, `electron-builder` dmg target (`identity: null`, asar, `files: dist/**`), follow the version-bump rule (`chore: bump version to X.Y.Z`, patch default). Verify the packaged app runs capture + polish on a clean machine.
 - **Acceptance:** dmg builds and installs; packaged app runs the full capture → interpret → reply loop.
 - **Blocks:** none · **Blocked by:** T-012 · **Parallel with:** none
+
+### T-014: Flow A — interactive polish revisions
+- **Type:** feature
+- **Status:** in-progress
+- **Requirement:** `docs/work/said-wat/requirements.md#story-6-flow-a`
+- **Code:** `workspace/app/src/main/polish-store.ts`, `workspace/app/src/main/polish-flow.ts`, `workspace/app/src/renderer/App.tsx`, `workspace/app/src/main/llm/kimi.ts`
+- **Description:** After the first polish result, the note shows a feedback box (Enter sends / Shift+Enter newline — ComposeBox convention). Feedback (e.g. "语气太生硬", "需要说得更细一点") is sent together with the original + previous revision history to Kimi, which rewrites; each round appends a visible revision (feedback label + copy button). Session is in-memory, independent of the capture thread; a new Cmd+Shift+E starts fresh from the current clipboard. Failure keeps the feedback in the box; retry re-sends the last feedback.
+- **Acceptance:** feedback → revised version appears; multiple rounds accumulate; copy works per version; empty feedback → hint, no request; failure → error + retry; new Cmd+Shift+E resets the session.
+- **Blocks:** none · **Blocked by:** T-002, T-007, T-009 · **Parallel with:** none

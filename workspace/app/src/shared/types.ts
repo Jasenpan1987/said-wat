@@ -47,6 +47,21 @@ export interface ThreadMessage {
   content: string;
 }
 
+/** One feedback → revision round in an interactive polish session (T-014). */
+export interface PolishRevision {
+  /** The user's feedback that produced this version ("" for the first pass). */
+  feedback: string;
+  text: string;
+}
+
+/** Full state of an interactive polish session shown in the note (T-014). */
+export interface PolishState {
+  original: string;
+  revisions: PolishRevision[];
+  sending: boolean;
+  error: string | null;
+}
+
 /** Assistant replies carry the Flow-B judgement (Story 7). */
 export interface SessionMessage extends ThreadMessage {
   answered?: boolean;
@@ -68,7 +83,7 @@ export type NoteView =
   | { kind: "error"; message: string }
   | { kind: "analysis"; analysis: InterpretResult }
   | { kind: "session"; state: SessionState }
-  | { kind: "polish"; original: string; polished: string };
+  | { kind: "polish"; state: PolishState };
 
 /** Sent main → note renderer whenever the note content changes. */
 export interface NoteShowPayload {
@@ -100,6 +115,12 @@ export interface ElectronAPI {
   thread: {
     /** Fetch the current conversation snapshot (recovery after reload). */
     get: () => Promise<SessionState | null>;
+  };
+  polish: {
+    /** Fetch the current polish session (recovery after reload). */
+    get: () => Promise<PolishState | null>;
+    /** Send a revision request for the current polish session (T-014). */
+    send: (feedback: string) => void;
   };
   settings: SettingsApi;
 }

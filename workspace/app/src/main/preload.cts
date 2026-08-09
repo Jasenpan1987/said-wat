@@ -29,6 +29,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
   thread: {
     get: () => ipcRenderer.invoke("thread-get"),
   },
+  polish: {
+    get: () => ipcRenderer.invoke("polish-get"),
+    send: (feedback) => ipcRenderer.send("polish-feedback", feedback),
+  },
   settings: {
     get: () => ipcRenderer.invoke("settings-get"),
     setHotkeys: (hotkeys) => ipcRenderer.invoke("settings-set-hotkeys", hotkeys),

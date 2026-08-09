@@ -117,6 +117,7 @@ As the user, I want to copy any English text and press the polish hotkey to get 
 **Acceptance criteria:**
 - Pressing the polish hotkey reads the current clipboard text and sends it to Kimi (text, non-thinking) for English polishing.
 - The result appears in the sticky-note popup (creating it if none is open) with: the original, the polished version, and a **copy button**.
+- **The note also shows a feedback box (interactive revision, T-014):** the user can ask for a rewrite (e.g. "语气太生硬", "需要说得更细一点"), the model revises using the original + previous revision history, and each round appears as a new version with its own copy button. Rounds accumulate until the user copies a version they like.
 - Copying puts the polished text on the clipboard; a brief "copied" confirmation shows in the note.
 - If the clipboard is empty or non-text, the note says so and does nothing further.
 
@@ -124,6 +125,8 @@ As the user, I want to copy any English text and press the polish hotkey to get 
 - Text already well-formed → polish returns a lightly touched version (never returns "no changes needed" as a dead end; it still provides a usable copy).
 - Clipboard holds an image → treated as empty-text case with a clear message (image polish is out of scope).
 - Network failure mid-request → error in the note, clipboard untouched (original text preserved).
+- A revision request fails → the feedback stays in the box, an error + retry shows; retry re-sends the same feedback. The polish session never joins the capture thread (context-free stays context-free).
+- A new polish hotkey press starts a fresh session from whatever is now on the clipboard (previous revision history discarded, in-memory only).
 
 ### Story 7 — Flow B: Chinese intent → judged translation {#story-7-flow-b}
 

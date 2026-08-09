@@ -1,14 +1,26 @@
 import { BrowserWindow, screen } from "electron";
 import path from "path";
-import type { NoteShowPayload, Rect } from "../shared/types.js";
+import type { NoteShowPayload, NoteView, Rect } from "../shared/types.js";
 
 const WIDTH = 420;
 const HEIGHT = 540;
 const GAP = 12;
 
+/** Which flow produced the current note content (retry routing). */
+export type NoteViewOrigin = "interpret" | "polish";
+
 let noteWindow: BrowserWindow | null = null;
 let pendingPayload: NoteShowPayload | null = null;
 let pendingShow = false;
+let lastView: { kind: NoteView["kind"]; origin: NoteViewOrigin | null } | null = null;
+
+/** Where the note's retry button should route (T-014). */
+export function getLastViewContext(): {
+  kind: NoteView["kind"];
+  origin: NoteViewOrigin | null;
+} | null {
+  return lastView;
+}
 
 /**
  * Shows the sticky-note popup with the given content. A single window is
@@ -17,8 +29,9 @@ let pendingShow = false;
  */
 export function showNote(
   payload: NoteShowPayload,
-  options: { rect?: Rect; displayId?: number } = {}
+  options: { rect?: Rect; displayId?: number; origin?: NoteViewOrigin } = {}
 ): void {
+  lastView = { kind: payload.view.kind, origin: options.origin ?? null };
   const win = getOrCreateNoteWindow();
   if (options.rect !== undefined) {
     positionNear(win, options.rect, options.displayId);

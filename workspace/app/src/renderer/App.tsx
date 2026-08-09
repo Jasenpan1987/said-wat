@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { NoteView, SessionMessage, SessionState } from "../shared/types";
+import type {
+  NoteView,
+  PolishState,
+  SessionMessage,
+  SessionState,
+} from "../shared/types";
 
 export function App() {
   const [view, setView] = useState<NoteView>({ kind: "loading" });
@@ -9,13 +14,20 @@ export function App() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const draftRef = useRef<HTMLTextAreaElement | null>(null);
+  const [polishDraft, setPolishDraft] = useState("");
+  const [polishSent, setPolishSent] = useState(false);
+  const [polishHint, setPolishHint] = useState(false);
 
   const session = view.kind === "session" ? view.state : null;
+  const polish = view.kind === "polish" ? view.state : null;
 
   // Recover state after a renderer reload (story 8: survives reloads).
   useEffect(() => {
     void window.electronAPI.thread.get().then((state) => {
       if (state) setView({ kind: "session", state });
+    });
+    void window.electronAPI.polish.get().then((state) => {
+      if (state) setView({ kind: "polish", state });
     });
   }, []);
 
@@ -47,6 +59,18 @@ export function App() {
     }
   }, [session, sent]);
 
+  // Clear the polish feedback once a revision round completed successfully.
+  useEffect(() => {
+    if (polish && polishSent && !polish.sending && !polish.error) {
+      setPolishDraft("");
+      setPolishSent(false);
+      setPolishHint(false);
+    }
+    if (polish && polishSent && polish.error) {
+      setPolishSent(false); // keep the feedback in the box
+    }
+  }, [polish, polishSent]);
+
   const copy = useCallback((text: string, id: string) => {
     window.electronAPI.note.copy(text);
     setCopiedId(id);
@@ -64,6 +88,17 @@ export function App() {
     setSent(true);
     setInlineHint(false);
   }, [session, draft]);
+
+  const sendPolishFeedback = useCallback(() => {
+    if (!polish || polish.sending) return;
+    if (!polishDraft.trim()) {
+      setPolishHint(true);
+      return;
+    }
+    window.electronAPI.polish.send(polishDraft);
+    setPolishSent(true);
+    setPolishHint(false);
+  }, [polish, polishDraft]);
 
   const onDraftKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Multi-Code ComposeBox convention: Enter sends, Shift+Enter newline.
@@ -124,38 +159,16 @@ export function App() {
           />
         )}
         {view.kind === "polish" && (
-          <div className="polish">
-            <section className="analysis-section">
-              <div className="section-head">
-                <h2>原文</h2>
-                <button
-                  className="copy-button tiny"
-                  onClick={() => copy(view.original, "polish-original")}
-                >
-                  {copiedId === "polish-original" ? "已复制 ✓" : "复制"}
-                </button>
-              </div>
-              <p className="muted">{view.original}</p>
-            </section>
-            <section className="analysis-section">
-              <div className="section-head">
-                <h2>润色结果</h2>
-                <button
-                  className="copy-button tiny"
-                  onClick={() => copy(view.polished, "polish")}
-                >
-                  {copiedId === "polish" ? "已复制 ✓" : "复制"}
-                </button>
-              </div>
-              <p className="polished">{view.polished}</p>
-            </section>
-            <button
-              className="primary copy-button"
-              onClick={() => copy(view.polished, "polish-main")}
-            >
-              {copiedId === "polish-main" ? "已复制 ✓" : "复制润色结果"}
-            </button>
-          </div>
+          <PolishWorkspace
+            state={view.state}
+            draft={polishDraft}
+            setDraft={setPolishDraft}
+            setHint={setPolishHint}
+            hint={polishHint}
+            send={sendPolishFeedback}
+            copiedId={copiedId}
+            copy={copy}
+          />
         )}
       </div>
     </div>
@@ -192,6 +205,97 @@ function AnalysisSections(props: {
           </p>
         </section>
       ))}
+    </div>
+  );
+}
+
+function PolishWorkspace(props: {
+  state: PolishState;
+  draft: string;
+  setDraft: (d: string) => void;
+  setHint: (b: boolean) => void;
+  hint: boolean;
+  send: () => void;
+  copiedId: string | null;
+  copy: (text: string, id: string) => void;
+}) {
+  const { state } = props;
+  return (
+    <div className="polish">
+      <section className="analysis-section">
+        <div className="section-head">
+          <h2>原文</h2>
+          <button
+            className="copy-button tiny"
+            onClick={() => props.copy(state.original, "polish-original")}
+          >
+            {props.copiedId === "polish-original" ? "已复制 ✓" : "复制"}
+          </button>
+        </div>
+        <p className="muted">{state.original}</p>
+      </section>
+
+      {state.revisions.map((rev, i) => (
+        <section className="analysis-section" key={`r${i}`}>
+          <div className="section-head">
+            <h2>{i === 0 ? "润色结果" : `修改 ${i}`}</h2>
+            <button
+              className="copy-button tiny"
+              onClick={() => props.copy(rev.text, `polish-r${i}`)}
+            >
+              {props.copiedId === `polish-r${i}` ? "已复制 ✓" : "复制"}
+            </button>
+          </div>
+          {rev.feedback && (
+            <p className="feedback-label">意见：{rev.feedback}</p>
+          )}
+          <p className="polished">{rev.text}</p>
+        </section>
+      ))}
+
+      {state.sending && (
+        <div className="sending">
+          <span className="spinner small" aria-hidden="true" />
+          <span>润色中…</span>
+        </div>
+      )}
+      {state.error && (
+        <div className="polish-error">
+          <p>{state.error}</p>
+          <button
+            className="copy-button small"
+            onClick={() => window.electronAPI.note.retry()}
+          >
+            重试
+          </button>
+        </div>
+      )}
+
+      <div className="draft-box">
+        <textarea
+          value={props.draft}
+          onChange={(e) => {
+            props.setDraft(e.target.value);
+            if (e.target.value.trim()) props.setHint(false);
+          }}
+          onKeyDown={(e) => {
+            // Multi-Code ComposeBox convention: Enter sends, Shift+Enter newline.
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              props.send();
+            }
+          }}
+          placeholder="不满意？说说意见，例如「语气太生硬」「需要说得更细一点」（Enter 发送）"
+          rows={2}
+          disabled={state.sending}
+        />
+        <div className="draft-actions">
+          {props.hint && <span className="inline-hint">内容不能为空</span>}
+          <button className="primary" onClick={props.send} disabled={state.sending}>
+            发送意见
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

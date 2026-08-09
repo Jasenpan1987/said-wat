@@ -3,7 +3,7 @@ import type {
   ChatCompletionCreateParamsNonStreaming,
   ChatCompletionMessageParam,
 } from "openai/resources/chat/completions";
-import type { InterpretResult, ThreadMessage } from "../../shared/types.js";
+import type { InterpretResult, PolishRevision, ThreadMessage } from "../../shared/types.js";
 import {
   INTERPRET_SYSTEM_PROMPT,
   POLISH_SYSTEM_PROMPT,
@@ -277,6 +277,39 @@ export async function polishText(text: string): Promise<string> {
     messages: [
       { role: "system", content: POLISH_SYSTEM_PROMPT },
       { role: "user", content: text },
+    ],
+    thinking: thinkingParam(model),
+  });
+  return result.trim();
+}
+
+/**
+ * Flow A revision round (T-014): rewrites the original honouring the user's
+ * feedback, using the previous feedback → revision history so earlier
+ * requests aren't lost (e.g. "more detail" must not undo "less stiff").
+ */
+export async function polishWithFeedback(
+  original: string,
+  revisions: PolishRevision[],
+  feedback: string
+): Promise<string> {
+  if (feedback.trim() === "") {
+    throw new LlmError("bad-input", "Nothing to revise — the feedback is empty.");
+  }
+  const history = revisions
+    .map((r, i) => `${i + 1}. 意见：${r.feedback || "（首次润色）"}\n   结果：${r.text}`)
+    .join("\n\n");
+  const userContent =
+    `原文：\n${original}\n\n` +
+    (history ? `之前的润色过程：\n${history}\n\n` : "") +
+    `用户的修改意见：${feedback}\n\n` +
+    `请按意见重写，只输出重写后的英文文本。`;
+  const model = getActiveModel();
+  const result = await complete({
+    model,
+    messages: [
+      { role: "system", content: POLISH_SYSTEM_PROMPT },
+      { role: "user", content: userContent },
     ],
     thinking: thinkingParam(model),
   });
