@@ -18,10 +18,18 @@ function pointInside(point: { x: number; y: number }, rect: Rect): boolean {
 export function Overlay() {
   const [payload, setPayload] = useState<OverlayInitPayload | null>(null);
   // Set on drag end; drives the toolbar and Enter/double-click confirm.
-  const [selection, setSelection] = useState<Rect | null>(null);
+  const [selection, setSelectionState] = useState<Rect | null>(null);
+  const selectionRef = useRef<Rect | null>(null);
+  const setSelection = useCallback((r: Rect | null) => {
+    selectionRef.current = r;
+    setSelectionState(r);
+  }, []);
   const dragRef = useRef<{ startX: number; startY: number } | null>(null);
   const liveRectRef = useRef<HTMLDivElement | null>(null);
   const liveSizeRef = useRef<HTMLDivElement | null>(null);
+  // A click outside the selection schedules a cancel, but a double-click
+  // (confirm) must win — the timer gives the second click time to land.
+  const pendingCancelRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return window.electronAPI.capture.onInit((payload) => {
@@ -37,6 +45,21 @@ export function Overlay() {
   const cancel = useCallback(() => {
     window.electronAPI.capture.cancel();
   }, []);
+
+  const cancelPendingCancel = useCallback(() => {
+    if (pendingCancelRef.current) {
+      clearTimeout(pendingCancelRef.current);
+      pendingCancelRef.current = null;
+    }
+  }, []);
+
+  const scheduleCancel = useCallback(() => {
+    cancelPendingCancel();
+    pendingCancelRef.current = setTimeout(() => {
+      pendingCancelRef.current = null;
+      cancel();
+    }, 280);
+  }, [cancel, cancelPendingCancel]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -80,8 +103,10 @@ export function Overlay() {
     } catch {
       // Pointer capture is a nicety — drags still work without it.
     }
+    cancelPendingCancel();
     dragRef.current = { startX: e.clientX, startY: e.clientY };
-    setSelection(null);
+    // Do NOT clear the selection here — a click (part of a possible
+    // double-click) must not destroy it.
     const el = liveRectRef.current;
     if (el) el.style.display = "none";
     const size = liveSizeRef.current;
@@ -91,13 +116,16 @@ export function Overlay() {
   const onPointerMove = (e: React.PointerEvent) => {
     const drag = dragRef.current;
     if (!drag) return;
-    paintLiveRect(
-      normalizeRect(
-        { x: drag.startX, y: drag.startY },
-        { x: e.clientX, y: e.clientY },
-        bounds
-      )
+    const rect = normalizeRect(
+      { x: drag.startX, y: drag.startY },
+      { x: e.clientX, y: e.clientY },
+      bounds
     );
+    if (rect.width >= MIN_SELECTION || rect.height >= MIN_SELECTION) {
+      // A real drag supersedes the previous selection.
+      if (selectionRef.current) setSelection(null);
+    }
+    paintLiveRect(rect);
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
@@ -110,9 +138,14 @@ export function Overlay() {
       bounds
     );
     if (rect.width < MIN_SELECTION && rect.height < MIN_SELECTION) {
-      // A click: cancel, unless it lands inside an existing selection where a
-      // double-click will confirm instead.
-      if (selection && pointInside({ x: e.clientX, y: e.clientY }, selection)) {
+      // A click. With a selection up: inside → wait for a double-click
+      // (confirm); outside → cancel unless a double-click lands. Without a
+      // selection: a bare click cancels (WeChat behaviour).
+      if (selectionRef.current) {
+        if (pointInside({ x: e.clientX, y: e.clientY }, selectionRef.current)) {
+          return;
+        }
+        scheduleCancel();
         return;
       }
       cancel();
@@ -122,9 +155,12 @@ export function Overlay() {
   };
 
   const onDoubleClick = (e: React.MouseEvent) => {
-    if (selection && pointInside({ x: e.clientX, y: e.clientY }, selection)) {
-      confirm(selection);
+    // Double-click anywhere confirms the current selection (acts like ✓).
+    if (selectionRef.current) {
+      cancelPendingCancel();
+      confirm(selectionRef.current);
     }
+    void e;
   };
 
   return (
@@ -167,7 +203,9 @@ export function Overlay() {
           </button>
         </div>
       )}
-      {payload?.interactive && <div className="hint">Drag to select · Esc to cancel</div>}
+      {payload?.interactive && (
+        <div className="hint">拖选区域 · 双击 / Enter 确认 · Esc 取消</div>
+      )}
     </div>
   );
 }
