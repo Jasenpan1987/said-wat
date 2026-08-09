@@ -4,7 +4,7 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 
 ### T-001: Scaffold pnpm workspace + Electron/TS/React app
 - **Type:** setup
-- **Status:** ready
+- **Status:** done (2026-08-10)
 - **Requirement:** `docs/work/said-wat/requirements.md` (epic)
 - **Knowledge:** `docs/knowledge/tech-conventions.md#repo-layout`, `docs/knowledge/tech-conventions.md#stack-conventions`
 - **Code:** `workspace/app/`

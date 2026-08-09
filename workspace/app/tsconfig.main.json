@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    // ESM output for Electron 35's main process. Relative imports in main code
+    // must carry explicit .js extensions (Node ESM resolution).
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "rootDir": "src",
+    "outDir": "dist",
+    "noEmit": false,
+    "declaration": false
+  },
+  "include": ["src/main/**/*.ts", "src/shared/**/*.ts"],
+  // Tests are run by vitest (ESM, top-level await for module mocks) and have no
+  // business in the shipped main bundle.
+  "exclude": ["src/**/*.test.ts"]
+}

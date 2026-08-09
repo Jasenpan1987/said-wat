@@ -1,0 +1,19 @@
+{
+  "name": "said-wat",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "./workspace/*"
+  ],
+  "scripts": {
+    "start": "npm start -w said-wat",
+    "build": "npm run build -w said-wat",
+    "lint": "pnpm -r --parallel --stream run lint",
+    "lint:fix": "pnpm -r --parallel --stream run lint:fix",
+    "type": "pnpm -r --parallel --stream run type",
+    "test": "npm run test -w said-wat"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0"
+  }
+}

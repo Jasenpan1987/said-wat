@@ -1,0 +1,9 @@
+/* Placeholder styles — the sticky-note UI lands in T-007. */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+}

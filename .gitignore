@@ -9,6 +9,14 @@ docs/local/
 node_modules/
 dist/
 dist-ssr/
+.eslintcache
+*.tsbuildinfo
+
+# electron-builder output. Kept separate from dist/ so packaged apps can't be
+# swept back into the next build's asar.
+release/
+*.dmg
+*.dmg.blockmap
 
 # Rust (Tauri)
 target/
