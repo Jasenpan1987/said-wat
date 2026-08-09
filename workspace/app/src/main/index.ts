@@ -4,7 +4,8 @@ import { loadDotEnv } from "./env.js";
 import { createTray } from "./tray.js";
 import { initHotkeys, stopHotkeys } from "./hotkeys.js";
 import { startCapture } from "./capture/index.js";
-import { registerNoteIpc } from "./note-window.js";
+import { registerIpcHandlers } from "./ipc-handlers.js";
+import { runDemoFlow, runInterpretFlow } from "./interpret-flow.js";
 
 const iconPath = path.join(
   import.meta.dirname,
@@ -39,16 +40,13 @@ app.on("second-instance", () => {
 
 app.whenReady().then(() => {
   tray = createTray(iconPath);
-  registerNoteIpc();
+  registerIpcHandlers();
   initHotkeys({
     onCapture: () => {
       void startCapture()
         .then((result) => {
           if (result) {
-            console.log(
-              `[capture] ${result.rect.width}x${result.rect.height} PNG, ${result.base64.length} bytes`
-            );
-            // T-008 replaces this log with interpretImage.
+            void runInterpretFlow(result);
           } else {
             console.log("[capture] cancelled");
           }
@@ -59,6 +57,12 @@ app.whenReady().then(() => {
     // but logs its press.
     onPolish: () => console.log("[hotkeys] polish pressed (flow arrives in T-009)"),
   });
+
+  // Demo mode: analyze the bundled sample screenshot through the real
+  // pipeline (no Screen Recording permission needed). SAIDWAT_DEMO=1.
+  if (process.env.SAIDWAT_DEMO === "1") {
+    setTimeout(() => void runDemoFlow(), 1200);
+  }
 });
 
 // Tray-only lifecycle: closing a sticky-note popup must never take the app

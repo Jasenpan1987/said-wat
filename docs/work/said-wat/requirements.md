@@ -173,14 +173,14 @@ As the user, I want the API key read from `MOONSHOT_API_KEY` and a small setting
 
 - **Performance:** cold start to tray icon ≤ 5s; capture → analysis shown ≤ 15s on a typical selection (network permitting).
 - **Footprint:** Electron-level idle memory is accepted by the builder (~200–300MB).
-- **Privacy:** the API key and captured images leave the machine only to `api.moonshot.ai`; nothing is logged or stored beyond the in-memory note thread.
+- **Privacy:** the API key and captured images leave the machine only to `api.moonshot.cn`; nothing is logged or stored beyond the in-memory note thread.
 - **Reliability:** all AI calls time out with a readable error; retries available; original clipboard/draft content is never destroyed by a failed run.
 - **UI copy:** Chinese (matches the user); code, comments, and commit messages in English (project convention).
 
 ## 6. Technical constraints
 
 - Electron 35 + TypeScript (strict, ES2024, ESM) + React 19, rspack renderer build, tsc main build, oxlint/eslint, vitest — per `docs/knowledge/tech-conventions.md`.
-- Kimi API via `openai` SDK with `base_url = https://api.moonshot.ai/v1`; model `kimi-k2.6` non-thinking by default, `kimi-k2.7-code` selectable.
+- Kimi API via `openai` SDK with `base_url = https://api.moonshot.cn/v1` (builder's key is on the Chinese platform — verified 2026-08-10); model `kimi-k2.6` non-thinking by default, `kimi-k2.7-code` selectable.
 - Capture: fullscreen overlay window + `desktopCapturer` snapshot; requires macOS Screen Recording permission.
 - Global hotkeys via Electron `globalShortcut`; clipboard via Electron `clipboard`.
 - Zero native dependencies.

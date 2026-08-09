@@ -13,8 +13,8 @@
 
 ## LLM integration
 
-- Base URL: `https://api.moonshot.ai/v1`; official `openai` Node SDK.
-- API key: env var `MOONSHOT_API_KEY`; never in repo, never hardcoded.
+- Base URL: `https://api.moonshot.cn/v1` (Chinese platform — verified live 2026-08-10; the builder's key does NOT authenticate against `api.moonshot.ai`). Official `openai` Node SDK.
+- API key: env var `MOONSHOT_API_KEY` (or repo-root `.env` in dev); never in repo, never hardcoded.
 - v1 default model: `kimi-k2.6` in non-thinking mode (vision + text, thinking switchable).
 - Fallback: `kimi-k2.7-code` (builder's "Kimi 2.7") — thinking always on; reserved for hard screenshot interpretation.
 - Vision input: `content` array with `type: "image_url"` + base64 data URL (png/jpeg/webp/gif; keep ≤4K).

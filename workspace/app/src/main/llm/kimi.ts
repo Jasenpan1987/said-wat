@@ -44,7 +44,10 @@ export class LlmError extends Error {
 
 export const DEFAULT_MODEL = "kimi-k2.6";
 export const FALLBACK_MODEL = "kimi-k2.7-code";
-export const BASE_URL = "https://api.moonshot.ai/v1";
+// The builder's account is on the Chinese Moonshot platform — keys from
+// platform.moonshot.cn authenticate against api.moonshot.cn, not api.moonshot.ai
+// (verified live 2026-08-10, G-002).
+export const BASE_URL = "https://api.moonshot.cn/v1";
 const TIMEOUT_MS = 60_000;
 
 // Settings (T-011) will call setModelOverride; until then the default is used.

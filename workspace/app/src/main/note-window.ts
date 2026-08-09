@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, screen } from "electron";
+import { BrowserWindow, screen } from "electron";
 import path from "path";
 import type { NoteShowPayload, Rect } from "../shared/types.js";
 
@@ -98,10 +98,4 @@ function positionNear(win: BrowserWindow, rect: Rect, displayId?: number): void 
 
 export function hideNote(): void {
   if (noteWindow && !noteWindow.isDestroyed()) noteWindow.hide();
-}
-
-/** Registers the renderer → main note IPC. Called once at app ready. */
-export function registerNoteIpc(): void {
-  ipcMain.on("note-dismiss", () => hideNote());
-  // note-retry is handled by T-008 (needs the last captured image).
 }

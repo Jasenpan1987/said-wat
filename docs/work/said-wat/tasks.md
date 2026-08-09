@@ -71,7 +71,7 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 
 ### T-008: Interpret flow wiring
 - **Type:** integration
-- **Status:** ready
+- **Status:** done (2026-08-10)
 - **Requirement:** `docs/work/said-wat/requirements.md#story-4-interpret`
 - **Code:** `workspace/app/src/main/ipc-handlers.ts`, `workspace/app/src/main/capture/`
 - **Description:** Capture confirm → cropped PNG base64 → `interpretImage` → parsed sections → note window shows them and thread store gets the analysis as root. Loading state during flight; on failure show friendly error + retry (re-send the same image). Prompt already enforces untranslatable parts kept as-is — verify passthrough, no client-side mangling.
