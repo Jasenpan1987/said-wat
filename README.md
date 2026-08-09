@@ -1,81 +1,81 @@
 # said-wat
 
-> macOS menu-bar AI companion: hotkey screenshot interpretation + an English drafting workspace — powered by Kimi (Moonshot).
+> macOS 菜单栏 AI 助手：快捷键截屏解析 + 英文起草工作区 —— 由 Kimi（Moonshot）驱动。
 
-said-wat lives in the menu bar and stays out of your way until a hotkey summons it. It solves two daily frictions for anyone working in English chats:
+said-wat 常驻菜单栏，平时隐形，按快捷键才出现。它解决两个日常痛点——给在英文聊天中工作的人：
 
-1. **Understanding long English messages** — press `Cmd+Shift+S`, drag-select the message (WeChat-desktop-screenshot style), get a sticky note with the full translation, a one-line summary, and the notable points (subtext, ambiguity, things that need a reply).
-2. **Writing dependable English replies** — from the same sticky note, draft a reply in English (polish it via hotkey) or state your intent in Chinese (the AI judges whether you answered the questions, translates it, and warns if you missed something).
+1. **看懂长英文消息** — 按 `Cmd+Shift+S`，框选消息（微信桌面版截图手感），弹出便签：全文翻译、一句话总结、值得注意的点（潜台词、歧义、需要回复的内容）。
+2. **写出可靠的英文回复** — 在同一个便签里，用英文起草（快捷键润色）或直接说中文意图（AI 判断你有没有答到点上、翻译成英文，漏了什么会警告你）。
 
-## Features
+## 功能
 
-- **Tray-resident** — single instance, no window at launch; quit from the tray.
-- **Global hotkeys** — `Cmd+Shift+S` capture / `Cmd+Shift+E` clipboard polish; rebindable in Settings.
-- **WeChat-style capture** — dim the screen, drag-select, ✓/Enter/double-click to confirm, Esc to cancel; multi-display aware.
-- **Three-section note** — full translation / one-line summary / notable points, each copyable.
-- **Interactive polish (Flow A)** — copy text → `Cmd+Shift+E` → idiomatic version, then keep iterating: tell it “语气太生硬” or “说得更细一点” and it revises, keeping every version copyable.
-- **Judged replies (Flow B)** — Chinese intent → judged English reply, with a warning when something’s missed; multi-turn thread memory (capped at 20).
-- **Settings window** — hotkey rebinding, model select, test connection, API-key status.
-- **Privacy** — the API key only ever lives in your environment (`.env`), never in the repo; nothing is logged or stored beyond the in-memory note thread.
+- **托盘常驻** — 单实例，启动无窗口；从托盘退出。
+- **全局快捷键** — `Cmd+Shift+S` 截图 / `Cmd+Shift+E` 剪贴板润色；可在设置里改键。
+- **微信式截图** — 屏幕变暗 → 拖拽框选 → ✓/Enter/双击确认，Esc 取消；支持多显示器。
+- **三段式便签** — 全文翻译 / 一句话总结 / 值得注意的点，每段可复制。
+- **交互式润色（Flow A）** — 复制文本 → `Cmd+Shift+E` → 地道版本，然后可以继续提意见：「语气太生硬」「说得更细一点」，它会按意见重写，每一版都可复制。
+- **判定式回复（Flow B）** — 中文意图 → 判定过的英文回复，漏答会有警告；多轮线程记忆（上限 20 条）。
+- **设置窗口** — 热键改键、模型选择、测试连接、API key 状态。
+- **隐私** — API key 只存在于你的环境（`.env`），绝不进仓库；除了内存里的便签线程，不记录、不落盘任何内容。
 
-## Requirements
+## 环境要求
 
-- macOS (currently the only supported platform)
-- Node.js 20+ and pnpm
+- macOS（目前仅支持该平台）
+- Node.js 20+ 与 pnpm
 
-## Quick start
+## 快速开始
 
 ```bash
-# 1. install
+# 1. 安装依赖
 pnpm install
 
-# 2. configure your API key (Moonshot / Kimi)
+# 2. 配置 API key（Moonshot / Kimi）
 cp .env.example .env
-# edit .env and fill in MOONSHOT_API_KEY
+# 编辑 .env，填入 MOONSHOT_API_KEY
 
-# 3. run
+# 3. 运行
 pnpm start
 ```
 
-First launch needs Screen Recording permission (required for the capture overlay) — said-wat opens System Settings for you when it’s missing.
+首次启动需要屏幕录制权限（截图功能必需）——缺失时 said-wat 会自动打开系统设置引导开启。
 
-## Usage
+## 使用
 
-| Hotkey | Action |
+| 快捷键 | 功能 |
 | --- | --- |
-| `Cmd+Shift+S` | Capture a screen region → translate / summarize / notable points |
-| `Cmd+Shift+E` | Polish the current clipboard text (interactive revisions) |
+| `Cmd+Shift+S` | 框选屏幕区域 → 翻译 / 总结 / 要点 |
+| `Cmd+Shift+E` | 润色当前剪贴板文本（可多轮交互） |
 
-In the note: `Enter` sends, `Shift+Enter` inserts a newline. Every text block has a copy button.
+便签内：`Enter` 发送，`Shift+Enter` 换行。每个文本块都有复制按钮。
 
-## Configuration
+## 配置
 
-- **API key** — `MOONSHOT_API_KEY` in `.env` (or your shell environment). Read at call time — setting it later needs no restart.
-- **Model** — default `kimi-k2.6` (non-thinking, cost-conscious); `kimi-k2.7-code` selectable in Settings. `SAIDWAT_MODEL` is a dev-only override.
-- **Hotkeys** — rebind in Settings (tray → Settings…); `Cmd+W` / `Cmd+Q` stay reserved for the system.
-- Settings persist in `~/Library/Application Support/said-wat/settings.json`.
+- **API key** — `.env` 中的 `MOONSHOT_API_KEY`（或 shell 环境变量）。调用时实时读取，之后设置也无需重启。
+- **模型** — 默认 `kimi-k2.6`（非思考模式，省钱）；设置里可选 `kimi-k2.7-code`。`SAIDWAT_MODEL` 是仅供开发的覆盖变量。
+- **热键** — 在设置中改键（托盘 → Settings…）；`Cmd+W` / `Cmd+Q` 保留给系统。
+- 设置保存在 `~/Library/Application Support/said-wat/settings.json`。
 
-## Development
+## 开发
 
 ```bash
-pnpm build   # rspack renderer + tsc main
+pnpm build   # rspack 打包 renderer + tsc 打包 main
 pnpm lint    # oxlint + eslint
 pnpm type    # tsc --noEmit
 pnpm test    # vitest
 ```
 
-Demo mode without Screen Recording: `SAIDWAT_DEMO=1 pnpm start` runs the real pipeline against a bundled sample screenshot.
+无需屏幕录制权限的演示模式：`SAIDWAT_DEMO=1 pnpm start`，会用内置示例截图跑完整流程。
 
-## Tech stack
+## 技术栈
 
-Electron 35 · TypeScript (strict, ESM) · React 19 · rspack · vitest · OpenAI-compatible Kimi API (`api.moonshot.cn`)
+Electron 35 · TypeScript（strict，ESM）· React 19 · rspack · vitest · OpenAI 兼容的 Kimi API（`api.moonshot.cn`）
 
-## Project structure
+## 项目结构
 
-- `workspace/app/src/main/` — tray, hotkeys, capture overlay, LLM client, flows, IPC
-- `workspace/app/src/renderer/` — note popup, capture overlay, settings
-- `workspace/app/src/shared/` — shared types
+- `workspace/app/src/main/` — 托盘、热键、截图遮罩、LLM 客户端、流程、IPC
+- `workspace/app/src/renderer/` — 便签弹窗、截图遮罩、设置
+- `workspace/app/src/shared/` — 共享类型
 
-## Roadmap
+## 路线图
 
-- Multi-provider model support (OpenAI / DeepSeek / Qwen / GLM …) with in-app API-key entry — recorded as Story 10.
+- 多模型支持（OpenAI / DeepSeek / Qwen / GLM 等）与应用内 API key 填写 —— 已记录为 Story 10。
