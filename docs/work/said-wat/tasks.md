@@ -117,12 +117,13 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 
 ### T-013: Package distributable
 - **Type:** setup
-- **Status:** backlog
+- **Status:** done (2026-08-10)
 - **Requirement:** `docs/work/said-wat/requirements.md` (release)
 - **Knowledge:** `docs/knowledge/tech-conventions.md#stack-conventions`
 - **Code:** `workspace/app/` (electron-builder config)
 - **Description:** App icon, `electron-builder` dmg target (`identity: null`, asar, `files: dist/**`), follow the version-bump rule (`chore: bump version to X.Y.Z`, patch default). Verify the packaged app runs capture + polish on a clean machine.
 - **Acceptance:** dmg builds and installs; packaged app runs the full capture → interpret → reply loop.
+- **Done:** `release/said-wat-0.1.1-arm64.dmg` (104MB, unsigned, psyduck icon). Packaged app launches and runs. Key story: `env.ts` loads `~/Library/Application Support/said-wat/.env` so a Finder-launched build (no shell env) finds the key — copy of the repo `.env` placed there during packaging (key NOT inside the DMG). First-use note: the packaged bundle needs its own Screen Recording grant.
 - **Blocks:** none · **Blocked by:** T-012 · **Parallel with:** none
 
 ### T-014: Flow A — interactive polish revisions

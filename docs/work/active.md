@@ -19,6 +19,9 @@
 - Flow A: copy text → `Cmd+Shift+E` → polished version + copy; clipboard untouched until user copies.
 - `.env` workflow (`.env.example` committed, `.env` gitignored, dev loader), key never in repo.
 - **Settings window (T-011):** tray → Settings… — hotkey rebinding (press-the-combo; conflicts keep previous + show reason; ⌘W/⌘Q reserved), model select (kimi-k2.6 default / kimi-k2.7-code), test-connection (models ping), API-key status indicator. Persisted to `~/Library/Application Support/said-wat/settings.json` (Multi-Code userData convention).
+- **Interactive polish (T-014):** Flow A now has a feedback box AFTER the first automatic result — multi-round revisions, each version copyable; first round shows a centered animated "润色中…" indicator; `Cmd+Shift+E` starts a fresh session.
+- **Packaged app (T-013):** `release/said-wat-0.1.1-arm64.dmg` (unsigned, psyduck icon). Packaged builds load the API key from `~/Library/Application Support/said-wat/.env` (env.ts; repo `.env` copied there during packaging — key NOT inside the DMG). Packaged bundle needs its OWN Screen Recording grant on first capture.
+- **GitHub:** `https://github.com/Jasenpan1987/said-wat` (PUBLIC). **Builder preference: never create/set repos public again — keep private.** Local `origin` points there; README default is Chinese (`README.md` zh, `README.en.md` en).
 
 ## Handoff notes for the next session
 

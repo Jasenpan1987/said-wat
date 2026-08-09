@@ -24,7 +24,6 @@ target/
 # Xcode
 DerivedData/
 *.xcuserstate
-build/
 
 # Environment & secrets
 .env
