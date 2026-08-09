@@ -2,7 +2,9 @@ packages:
   - "workspace/*"
 allowBuilds:
   electron: true
+  electron-winstaller: true
   esbuild: true
 onlyBuiltDependencies:
   - electron
+  - electron-winstaller
   - esbuild

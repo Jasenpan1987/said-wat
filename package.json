@@ -15,5 +15,8 @@
   },
   "devDependencies": {
     "typescript": "^5.8.0"
+  },
+  "dependencies": {
+    "openai": "^7.4.0"
   }
 }

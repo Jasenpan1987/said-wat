@@ -14,7 +14,7 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 
 ### T-002: Kimi LLM client
 - **Type:** integration
-- **Status:** ready
+- **Status:** done (2026-08-10)
 - **Requirement:** `docs/work/said-wat/requirements.md#story-9-api-key`, `docs/work/said-wat/requirements.md#story-4-interpret`
 - **Knowledge:** `docs/knowledge/architecture.md#llm-integration`
 - **Code:** `workspace/app/src/main/llm/`
