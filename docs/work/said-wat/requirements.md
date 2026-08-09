@@ -2,7 +2,7 @@
 
 > **Purpose:** What said-wat delivers, in testable user stories.
 > **Status:** Current
-> **Version:** 1.0 · 2026-08-09
+> **Version:** 1.2 · 2026-08-09
 > **Sources:** `docs/knowledge/project.md`, `docs/knowledge/architecture.md`, `docs/records/meetings/2026-08-09_alignment-said-wat.md`, `docs/records/decisions/ADR-001-stack-and-provider.md`
 
 ## 1. What this delivers and why
@@ -23,6 +23,18 @@ The builder reads tens-of-lines English messages from colleagues (Teams work gro
 A single user (the builder): macOS, daily English group chats and browsing, cost-sensitive, wants the app invisible until a hotkey summons it.
 
 ## 4. User stories
+
+### Intent routing — the app never guesses {#intent-routing}
+
+Intent is determined by **trigger and language, never inferred**:
+
+| Input | Trigger | Intent | Context |
+|---|---|---|---|
+| Screen region | Capture hotkey (`Cmd+Shift+W`) | "What did they say" → interpret | New conversation rooted at the capture |
+| Clipboard text | Polish hotkey (`Cmd+Shift+E`) | "Fix my English" → polish | None — always context-free |
+| Text in the note's draft box | Send (`Enter`) | Chinese → judge + translate; English → polish-with-context | The open note's full conversation |
+
+A note is **one conversation**: everything sent inside it carries the capture analysis plus all prior exchanges. A new capture starts a **new** conversation (previous thread cleared). Polish is standalone and never joins a thread.
 
 ### Story 1 — Tray-resident lifecycle, no window at launch {#story-1-tray-lifecycle}
 
@@ -96,7 +108,7 @@ As the user, I want the result in a small always-on-top popup that stays while I
 - The note does not steal keyboard focus from the app underneath when first shown unless the user interacts with it (mirrors Multi-Code's non-focus-stealing popup behavior).
 
 **Edge cases:**
-- Multiple sequential captures → the newest analysis replaces the previous one in the same note (thread from the old note is cleared; confirmation of this behavior in review).
+- Multiple sequential captures → the newest analysis starts a fresh thread (the previous thread is cleared) — deliberate: a new capture means a new conversation context.
 
 ### Story 6 — Flow A: clipboard polish {#story-6-flow-a}
 
@@ -139,7 +151,7 @@ As the user, I want the note to remember every exchange I've had in it, so follo
 **Acceptance criteria:**
 - The thread contains: the original analysis, each sent draft, and each AI reply, in order.
 - Every new send (Story 7) includes the full thread; the AI's judgement and reply can reference earlier exchanges.
-- The thread lives for the lifetime of the open note; closing the note clears it (persistence across app restarts is out of scope — see §8).
+- The thread is held in **main-process memory**; closing and reopening the note within the app session keeps it (survives renderer reloads). Quitting the app clears it — nothing is written to disk.
 
 **Edge cases:**
 - Long threads near context limits → cap the thread (keep earliest turns) and note the truncation in the note rather than failing.
@@ -187,12 +199,15 @@ As the user, I want the API key read from `MOONSHOT_API_KEY` and a small setting
 - **Multi-provider support** — Kimi only.
 - **Standalone input window** (original scheme A) — superseded by the sticky-note draft box.
 - **Capture annotation toolbar** (pen/arrow/undo etc.) — WeChat clone covers dim + select + cancel/confirm only. ⚠️ *Call to confirm: the builder said "一模一样", which could include annotations.*
-- **Thread persistence across app restarts** — threads live with the open note. ⚠️ *Call to confirm.*
+- **Thread persistence across app restarts** — memory only (main process); threads are cleared when the app quits. Decided 2026-08-09.
 - **Auto-launch at login** — v1 starts the app manually. ⚠️ *Assumption to confirm.*
 - **Image polish / image-in-clipboard handling** — text only.
 - **Cross-platform** — macOS only.
 
-## 9. How we'd know it succeeded
+## Changelog
+
+- **1.2 (2026-08-09):** Intent-routing rules locked (§ Intent routing — trigger and language decide, never guessed); context-connection design explicitly parked as G-003 to revisit after real usage.
+- **1.1 (2026-08-09):** Story 8 — thread storage settled as main-process memory (survives note close/reopen in-session, cleared on quit, nothing on disk); Story 5 — new capture starts a fresh thread (decided); §8 — persistence-across-restart call resolved. Discussed with builder.
 
 - The builder understands a long English chat message in seconds using capture + the three-section note, without reading the raw text.
 - An English reply (drafted in English or as Chinese intent) is produced, judged, and copied in under a minute.

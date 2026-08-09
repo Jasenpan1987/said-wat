@@ -11,13 +11,13 @@ A menu-bar-resident Electron utility: hotkey screenshot interpretation (WeChat-s
 ## Current state
 
 - Alignment interview complete (2026-08-09) — all product decisions locked.
-- Requirements drafted: `requirements.md` (9 stories) — **pending builder review**.
-- No code yet. No tasks yet.
+- Requirements drafted: `requirements.md` (9 stories, v1.2) — **builder approved for v1 build** (iterate after real usage; context-connection parked as G-003).
+- Tasks + milestones written: `tasks.md` (T-001…T-013), `milestones.md` — **current milestone: M1**.
+- No code yet.
 
 ## Next action
 
-1. Builder reviews requirements (confirm the three ⚠️ out-of-scope calls in §8).
-2. `kanban` → break stories into tasks and milestones.
+1. `work` → scaffold (T-001), then the M1 chain: T-003 → T-004 → T-005 → T-008.
 
 ## Key knowledge links
 
