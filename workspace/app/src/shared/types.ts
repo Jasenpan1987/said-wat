@@ -101,4 +101,39 @@ export interface ElectronAPI {
     /** Fetch the current conversation snapshot (recovery after reload). */
     get: () => Promise<SessionState | null>;
   };
+  settings: SettingsApi;
+}
+
+/** The hotkeys exposed by the settings surface (T-011). */
+export type HotkeyName = "capture" | "polish";
+
+/** Per-key outcome of a hotkey registration attempt. */
+export interface HotkeyResult {
+  ok: boolean;
+  reason?: string;
+}
+
+export type HotkeyReport = Partial<Record<HotkeyName, HotkeyResult>>;
+
+/** Snapshot the settings window renders (T-011). */
+export interface SettingsState {
+  hotkeys: Record<HotkeyName, string>;
+  /** null = default model (kimi-k2.6). */
+  model: string | null;
+  /** Whether MOONSHOT_API_KEY is present in the environment right now. */
+  apiKeySet: boolean;
+}
+
+/** Renderer → main settings API (T-011). */
+export interface SettingsApi {
+  /** Current effective settings + API-key presence. */
+  get: () => Promise<SettingsState>;
+  /** Rebind both hotkeys; resolves with the per-key registration report. */
+  setHotkeys: (hotkeys: Record<HotkeyName, string>) => Promise<HotkeyReport>;
+  /** Persist a model override (null = default). */
+  setModel: (model: string | null) => Promise<void>;
+  /** Minimal API ping; resolves with a friendly result for the UI. */
+  testConnection: () => Promise<{ ok: boolean; message: string }>;
+  /** Tell main a hotkey combo is being recorded (lifecycle-key guard). */
+  setRecording: (active: boolean) => void;
 }

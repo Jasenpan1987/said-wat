@@ -6,9 +6,9 @@
 
 ## Current focus
 
-**Stage: M1 + M2 features built and demoed live on the builder's machine.**
+**Stage: M1 + M2 features built and demoed live on the builder's machine; T-011 settings window done (2026-08-10).**
 **Epic:** `docs/work/said-wat/` — macOS LLM companion: screenshot interpret + English drafting workspace.
-**Task list:** `docs/work/said-wat/tasks.md` (T-001…T-010 done, T-011/T-012/T-013 backlog).
+**Task list:** `docs/work/said-wat/tasks.md` (T-001…T-011 done, T-012/T-013 backlog).
 
 ## What works now (verified live 2026-08-10)
 
@@ -18,6 +18,7 @@
 - Reply workspace: draft box (Enter send / Shift+Enter newline), Chinese intent → judged English reply ("已回答 ✓"/"未回答 ⚠" + warning), thread memory (cap 20 + truncated flag), copy buttons on every text block.
 - Flow A: copy text → `Cmd+Shift+E` → polished version + copy; clipboard untouched until user copies.
 - `.env` workflow (`.env.example` committed, `.env` gitignored, dev loader), key never in repo.
+- **Settings window (T-011):** tray → Settings… — hotkey rebinding (press-the-combo; conflicts keep previous + show reason; ⌘W/⌘Q reserved), model select (kimi-k2.6 default / kimi-k2.7-code), test-connection (models ping), API-key status indicator. Persisted to `~/Library/Application Support/said-wat/settings.json` (Multi-Code userData convention).
 
 ## Handoff notes for the next session
 
@@ -31,11 +32,10 @@
 - Checks: `pnpm build && pnpm lint && pnpm type && pnpm test` (51 tests). Commit messages English.
 
 **Next tasks (pick with the builder):**
-1. **T-011 Settings window** (recommended next feature): rebind hotkeys (builder hit WeChat conflict on Cmd+Shift+W — wants to rebind without closing WeChat), model select (k2.6 / k2.7-code), test-connection, API-key status. Code: `settings-store.ts` + settings view; note the packaged-app env story below.
-2. **T-012 qa boundary review**: manual items accumulated — tray Quit click, note focus behaviour, real capture UX on the builder's dual monitors, judgement accuracy, packaged-app env story (Finder-launched app has no shell env — story 9 vs packaging is unresolved, surface to builder).
-3. **T-013 Package dmg** — after qa; needs the icon + version bump chore convention.
+1. **T-012 qa boundary review** (next): manual items accumulated — tray Quit click, note focus behaviour, real capture UX on the builder's dual monitors, judgement accuracy, settings window walk-through, **packaged-app env story (Finder-launched app has no shell env — settings API-key status would read "not set"; unresolved, surface to builder)**.
+2. **T-013 Package dmg** — after qa; needs the icon + version bump chore convention.
 
-**Open questions for the builder:** T-011 vs qa first; judgement/warning quality feedback from real usage; G-003 (cross-capture context) stays deferred until real usage.
+**Open questions for the builder:** judgement/warning quality feedback from real usage; G-003 (cross-capture context) stays deferred until real usage.
 
 ## Open items (gaps.md)
 

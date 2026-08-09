@@ -98,11 +98,12 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 
 ### T-011: Settings window
 - **Type:** feature
-- **Status:** backlog
+- **Status:** done (2026-08-10)
 - **Requirement:** `docs/work/said-wat/requirements.md#story-9-api-key`
 - **Code:** `workspace/app/src/renderer/` (settings view), `workspace/app/src/main/settings-store.ts`
 - **Description:** `settings-store.ts` — JSON under the user config dir (`~/.config/said-wat/`) holding hotkey bindings + model override. Settings window opened from the tray menu: rebind capture/polish hotkeys (conflict warning, keep previous on failure), model select (`kimi-k2.6` default / `kimi-k2.7-code`), test-connection button (tiny API ping), API-key status indicator (is `MOONSHOT_API_KEY` set in the environment?). Changes apply immediately and persist.
 - **Acceptance:** rebinding a hotkey takes effect; model override flows into T-002 calls; test-connection reports success/failure; settings survive restart.
+- **Done:** `settings-store.ts` (userData/settings.json) + settings window from tray: press-the-combo hotkey rebinding (conflict keep-previous + ⌘W/⌘Q reserved), model select (k2.6 default / k2.7-code), test-connection via models ping, API-key status. Settings load at startup (hotkeys + model override). 60 tests green.
 - **Blocks:** none · **Blocked by:** T-003, T-002 · **Parallel with:** T-009, T-010
 
 ### T-012: End-to-end verification pass

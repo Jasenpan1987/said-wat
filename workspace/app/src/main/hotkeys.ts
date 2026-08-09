@@ -1,20 +1,14 @@
 import { globalShortcut } from "electron";
+import type { HotkeyName, HotkeyReport } from "../shared/types.js";
 
-export type HotkeyName = "capture" | "polish";
+export type { HotkeyReport } from "../shared/types.js";
 
-export interface HotkeyBindings {
-  capture: string;
-  polish: string;
-}
+export type HotkeyBindings = Record<HotkeyName, string>;
 
 export interface HotkeyHandlers {
   onCapture: () => void;
   onPolish: () => void;
 }
-
-export type HotkeyReport = Partial<
-  Record<HotkeyName, { ok: boolean; reason?: string }>
->;
 
 // macOS-only product; the default accelerators are the ones agreed in the
 // requirements (G-001 resolved 2026-08-10: capture moved to Cmd+Shift+S —
@@ -110,4 +104,9 @@ export function updateHotkeys(bindings: HotkeyBindings): HotkeyReport {
 export function stopHotkeys(): void {
   globalShortcut.unregisterAll();
   active.clear();
+}
+
+/** The currently active bindings (after conflict keep-previous logic). */
+export function getCurrentHotkeys(): HotkeyBindings {
+  return { ...current };
 }

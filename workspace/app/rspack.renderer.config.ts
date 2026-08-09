@@ -6,6 +6,7 @@ export default defineConfig({
   entry: {
     app: "./src/renderer/index.tsx",
     overlay: "./src/renderer/overlay/index.tsx",
+    settings: "./src/renderer/settings/index.tsx",
   },
   output: {
     path: path.resolve(import.meta.dirname, "dist/renderer"),
@@ -47,6 +48,11 @@ export default defineConfig({
       template: "./src/renderer/overlay/overlay.html",
       filename: "overlay.html",
       chunks: ["overlay"],
+    }),
+    new rspack.HtmlRspackPlugin({
+      template: "./src/renderer/settings/index.html",
+      filename: "settings.html",
+      chunks: ["settings"],
     }),
     new rspack.CopyRspackPlugin({
       patterns: [

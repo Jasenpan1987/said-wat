@@ -7,7 +7,7 @@ import { Menu, Tray, app, nativeImage } from "electron";
  * The returned Tray must be kept referenced for its lifetime — the module
  * singleton in index.ts does that.
  */
-export function createTray(iconPath: string): Tray {
+export function createTray(iconPath: string, onOpenSettings: () => void): Tray {
   const icon = nativeImage.createFromPath(iconPath);
   icon.setTemplateImage(true);
 
@@ -15,8 +15,7 @@ export function createTray(iconPath: string): Tray {
   tray.setToolTip("said-wat");
   tray.setContextMenu(
     Menu.buildFromTemplate([
-      // Placeholder until T-011 wires the settings window.
-      { label: "Settings", enabled: false },
+      { label: "Settings…", click: () => onOpenSettings() },
       { type: "separator" },
       { label: "Quit", click: () => app.quit() },
     ])

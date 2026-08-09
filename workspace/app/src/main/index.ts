@@ -2,11 +2,14 @@ import { app, BrowserWindow } from "electron";
 import path from "path";
 import { loadDotEnv } from "./env.js";
 import { createTray } from "./tray.js";
-import { initHotkeys, stopHotkeys } from "./hotkeys.js";
+import { initHotkeys, stopHotkeys, getCurrentHotkeys } from "./hotkeys.js";
 import { startCapture } from "./capture/index.js";
 import { registerIpcHandlers } from "./ipc-handlers.js";
 import { runDemoFlow, runInterpretFlow } from "./interpret-flow.js";
 import { runPolishFlow } from "./polish-flow.js";
+import { loadSettings, saveSettings } from "./settings-store.js";
+import { setModelOverride } from "./llm/kimi.js";
+import { showSettingsWindow } from "./settings-window.js";
 
 const iconPath = path.join(
   import.meta.dirname,
@@ -40,30 +43,43 @@ app.on("second-instance", () => {
 });
 
 app.whenReady().then(() => {
-  tray = createTray(iconPath);
+  // Persisted settings drive startup wiring (T-011): hotkey bindings and the
+  // model override flow straight into the hotkey manager and the LLM client.
+  const settings = loadSettings();
+  setModelOverride(settings.model);
+
+  tray = createTray(iconPath, () => showSettingsWindow());
   registerIpcHandlers();
-  const report = initHotkeys({
-    onCapture: () => {
-      void startCapture()
-        .then((result) => {
-          if (result) {
-            void runInterpretFlow(result);
-          } else {
-            console.log("[capture] cancelled");
-          }
-        })
-        .catch((err) => console.error("[capture] failed:", err));
+  const report = initHotkeys(
+    {
+      onCapture: () => {
+        void startCapture()
+          .then((result) => {
+            if (result) {
+              void runInterpretFlow(result);
+            } else {
+              console.log("[capture] cancelled");
+            }
+          })
+          .catch((err) => console.error("[capture] failed:", err));
+      },
+      // Flow A: clipboard polish (T-009).
+      onPolish: () => {
+        void runPolishFlow();
+      },
     },
-    // Flow A: clipboard polish (T-009).
-    onPolish: () => {
-      void runPolishFlow();
-    },
-  });
+    settings.hotkeys
+  );
 
   // Surface registration failures (e.g. an accelerator held by another app)
   // instead of silently missing a hotkey.
   for (const [name, result] of Object.entries(report)) {
     if (!result?.ok) console.warn(`[hotkeys] ${name} not registered: ${result?.reason}`);
+  }
+  // A stored binding that failed to register falls back to the default; keep
+  // the settings file in sync with what is actually active.
+  if (Object.values(report).some((r) => r && !r.ok)) {
+    saveSettings({ ...loadSettings(), hotkeys: getCurrentHotkeys() });
   }
 
   // Demo mode: analyze the bundled sample screenshot through the real

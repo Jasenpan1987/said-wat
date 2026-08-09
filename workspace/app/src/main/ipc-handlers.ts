@@ -3,6 +3,11 @@ import { hideNote } from "./note-window.js";
 import { retryLastInterpret } from "./interpret-flow.js";
 import { sendDraft } from "./reply-flow.js";
 import { getThread } from "./thread-store.js";
+import { loadSettings, saveSettings } from "./settings-store.js";
+import { getCurrentHotkeys, updateHotkeys } from "./hotkeys.js";
+import { setModelOverride, testConnection } from "./llm/kimi.js";
+import { setSettingsRecording } from "./settings-window.js";
+import { friendlyError } from "./ui-errors.js";
 
 /** Registers all renderer → main IPC. Called once at app ready. */
 export function registerIpcHandlers(): void {
@@ -15,4 +20,42 @@ export function registerIpcHandlers(): void {
     void sendDraft(draft);
   });
   ipcMain.handle("thread-get", () => getThread());
+
+  // ---- Settings (T-011) ----
+  ipcMain.handle("settings-get", () => {
+    const settings = loadSettings();
+    return {
+      // The effective runtime bindings — reality, not the stored file.
+      hotkeys: getCurrentHotkeys(),
+      model: settings.model,
+      apiKeySet: Boolean(process.env.MOONSHOT_API_KEY),
+    };
+  });
+
+  ipcMain.handle("settings-set-hotkeys", (_event, hotkeys) => {
+    const report = updateHotkeys(hotkeys);
+    // Persist the *effective* bindings (conflict keep-previous may differ).
+    saveSettings({ ...loadSettings(), hotkeys: getCurrentHotkeys() });
+    return report;
+  });
+
+  ipcMain.handle("settings-set-model", (_event, model: string | null) => {
+    const normalized =
+      typeof model === "string" && model.trim() !== "" ? model.trim() : null;
+    setModelOverride(normalized);
+    saveSettings({ ...loadSettings(), model: normalized });
+  });
+
+  ipcMain.handle("settings-test-connection", async () => {
+    try {
+      await testConnection();
+      return { ok: true, message: "连接成功 ✓" };
+    } catch (err) {
+      return { ok: false, message: friendlyError(err) };
+    }
+  });
+
+  ipcMain.on("settings-recording", (_event, active: boolean) => {
+    setSettingsRecording(active === true);
+  });
 }

@@ -29,4 +29,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   thread: {
     get: () => ipcRenderer.invoke("thread-get"),
   },
+  settings: {
+    get: () => ipcRenderer.invoke("settings-get"),
+    setHotkeys: (hotkeys) => ipcRenderer.invoke("settings-set-hotkeys", hotkeys),
+    setModel: (model) => ipcRenderer.invoke("settings-set-model", model),
+    testConnection: () => ipcRenderer.invoke("settings-test-connection"),
+    setRecording: (active) => ipcRenderer.send("settings-recording", active),
+  },
 });

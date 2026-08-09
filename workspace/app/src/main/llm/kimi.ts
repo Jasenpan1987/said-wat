@@ -19,6 +19,16 @@ export interface ReplyResult {
   reply: string;
 }
 
+/** Minimal ping used by the settings test-connection button (T-011). */
+export async function testConnection(): Promise<void> {
+  const client = createClient();
+  try {
+    await client.models.list();
+  } catch (err) {
+    throw mapError(err);
+  }
+}
+
 export type LlmErrorCode =
   | "missing-key"
   | "auth"

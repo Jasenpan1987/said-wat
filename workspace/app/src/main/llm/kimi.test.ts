@@ -1,13 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-const { mockCreate, mockClientOptions } = vi.hoisted(() => ({
+const { mockCreate, mockModelsList, mockClientOptions } = vi.hoisted(() => ({
   mockCreate: vi.fn(),
+  mockModelsList: vi.fn(),
   mockClientOptions: [] as Array<Record<string, unknown>>,
 }));
 
 vi.mock("openai", () => ({
   default: class MockOpenAI {
     chat = { completions: { create: mockCreate } };
+    models = { list: mockModelsList };
     constructor(options: Record<string, unknown>) {
       mockClientOptions.push(options);
     }
@@ -25,6 +27,7 @@ import {
   polishText,
   replyWithContext,
   setModelOverride,
+  testConnection,
 } from "./kimi.js";
 
 const IMAGE = "aGVsbG8="; // "hello"
@@ -178,6 +181,29 @@ describe("error mapping", () => {
     const err = new LlmError("bad-input", "nope");
     mockCreate.mockRejectedValue(err);
     await expect(polishText("hello world")).rejects.toMatchObject({ code: "bad-input" });
+  });
+});
+
+describe("testConnection", () => {
+  beforeEach(() => {
+    mockModelsList.mockReset();
+    process.env.MOONSHOT_API_KEY = "test-key";
+  });
+
+  it("resolves when the models ping succeeds", async () => {
+    mockModelsList.mockResolvedValue({ data: [] });
+    await expect(testConnection()).resolves.toBeUndefined();
+    expect(mockModelsList).toHaveBeenCalledTimes(1);
+  });
+
+  it("throws missing-key when the env var is absent", async () => {
+    delete process.env.MOONSHOT_API_KEY;
+    await expect(testConnection()).rejects.toMatchObject({ code: "missing-key" });
+  });
+
+  it("maps 401 to auth", async () => {
+    mockModelsList.mockRejectedValue({ status: 401, message: "unauthorized" });
+    await expect(testConnection()).rejects.toMatchObject({ code: "auth" });
   });
 });
 
