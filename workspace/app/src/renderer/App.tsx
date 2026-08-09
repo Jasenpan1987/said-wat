@@ -271,7 +271,10 @@ function PolishWorkspace(props: {
         </div>
       )}
 
-      <div className="draft-box">
+      {/* The feedback box only appears after the first (automatic) polish
+          result — the first round never asks for input. */}
+      {state.revisions.length > 0 && (
+        <div className="draft-box">
         <textarea
           value={props.draft}
           onChange={(e) => {
@@ -295,7 +298,8 @@ function PolishWorkspace(props: {
             发送意见
           </button>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
