@@ -12,7 +12,7 @@
 
 ## Next move
 
-1. `work` T-003 → T-004 → T-005 → T-008 (M1 chain), with T-002 (Kimi client, parallel) and T-007 (note shell) landing before T-008.
+1. `work` T-006 (thread store) → T-008 (interpret flow wiring) to finish M1.
 2. M1 done → `qa` boundary review → M2.
 
 ## Decisions locked (alignment 2026-08-09 — record: `docs/records/meetings/2026-08-09_alignment-said-wat.md`, ADR-001)
@@ -23,7 +23,9 @@
 
 ## Progress
 
-- T-001 scaffold done 2026-08-10: pnpm workspace + Electron 35 / TS strict (ESM main) / React 19 / rspack / oxlint+eslint / vitest; tray placeholder runs via `pnpm start`. Judgment calls: `.omt/judgment-calls-T-001.md`.
+- T-001 scaffold (2026-08-10): pnpm workspace + Electron 35 / TS strict (ESM main) / React 19 / rspack / oxlint+eslint / vitest; tray placeholder runs via `pnpm start`. Judgment calls: `.omt/judgment-calls-T-001.md`.
+- T-003 tray + lifecycle, T-004 global hotkeys, T-005 capture overlay, T-002 Kimi client, T-007 note shell — all done 2026-08-10, suite green (39 tests). Judgment calls in `.omt/judgment-calls-T-*.md`.
+- M1 remaining: T-006 (thread store), T-008 (interpret wiring). Manual qa items piling up: tray Quit click, real capture on a granted-permission machine, focus behaviour of the note.
 
 ## Open items
 
