@@ -41,7 +41,7 @@ app.on("second-instance", () => {
 app.whenReady().then(() => {
   tray = createTray(iconPath);
   registerIpcHandlers();
-  initHotkeys({
+  const report = initHotkeys({
     onCapture: () => {
       void startCapture()
         .then((result) => {
@@ -57,6 +57,12 @@ app.whenReady().then(() => {
     // but logs its press.
     onPolish: () => console.log("[hotkeys] polish pressed (flow arrives in T-009)"),
   });
+
+  // Surface registration failures (e.g. an accelerator held by another app)
+  // instead of silently missing a hotkey.
+  for (const [name, result] of Object.entries(report)) {
+    if (!result?.ok) console.warn(`[hotkeys] ${name} not registered: ${result?.reason}`);
+  }
 
   // Demo mode: analyze the bundled sample screenshot through the real
   // pipeline (no Screen Recording permission needed). SAIDWAT_DEMO=1.
