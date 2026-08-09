@@ -105,6 +105,8 @@ export function App() {
             translation={view.analysis.translation}
             summary={view.analysis.summary}
             notablePoints={view.analysis.notablePoints}
+            copy={copy}
+            copiedId={copiedId}
           />
         )}
         {session && (
@@ -124,18 +126,34 @@ export function App() {
         {view.kind === "polish" && (
           <div className="polish">
             <section className="analysis-section">
-              <h2>原文</h2>
+              <div className="section-head">
+                <h2>原文</h2>
+                <button
+                  className="copy-button tiny"
+                  onClick={() => copy(view.original, "polish-original")}
+                >
+                  {copiedId === "polish-original" ? "已复制 ✓" : "复制"}
+                </button>
+              </div>
               <p className="muted">{view.original}</p>
             </section>
             <section className="analysis-section">
-              <h2>润色结果</h2>
+              <div className="section-head">
+                <h2>润色结果</h2>
+                <button
+                  className="copy-button tiny"
+                  onClick={() => copy(view.polished, "polish")}
+                >
+                  {copiedId === "polish" ? "已复制 ✓" : "复制"}
+                </button>
+              </div>
               <p className="polished">{view.polished}</p>
             </section>
             <button
               className="primary copy-button"
-              onClick={() => copy(view.polished, "polish")}
+              onClick={() => copy(view.polished, "polish-main")}
             >
-              {copiedId === "polish" ? "已复制 ✓" : "复制润色结果"}
+              {copiedId === "polish-main" ? "已复制 ✓" : "复制润色结果"}
             </button>
           </div>
         )}
@@ -148,21 +166,32 @@ function AnalysisSections(props: {
   translation: string;
   summary: string;
   notablePoints: string;
+  copy: (text: string, id: string) => void;
+  copiedId: string | null;
 }) {
+  const sections: Array<[string, string, string]> = [
+    ["全文翻译", props.translation, "analysis-t"],
+    ["一句话总结", props.summary, "analysis-s"],
+    ["值得注意的点", props.notablePoints, "analysis-n"],
+  ];
   return (
     <div className="analysis">
-      <section className="analysis-section">
-        <h2>全文翻译</h2>
-        <p className="analysis-translation">{props.translation}</p>
-      </section>
-      <section className="analysis-section">
-        <h2>一句话总结</h2>
-        <p>{props.summary}</p>
-      </section>
-      <section className="analysis-section">
-        <h2>值得注意的点</h2>
-        <p>{props.notablePoints}</p>
-      </section>
+      {sections.map(([title, text, id]) => (
+        <section className="analysis-section" key={id}>
+          <div className="section-head">
+            <h2>{title}</h2>
+            <button
+              className="copy-button tiny"
+              onClick={() => props.copy(text, id)}
+            >
+              {props.copiedId === id ? "已复制 ✓" : "复制"}
+            </button>
+          </div>
+          <p className={id === "analysis-t" ? "analysis-translation" : undefined}>
+            {text}
+          </p>
+        </section>
+      ))}
     </div>
   );
 }
@@ -186,6 +215,8 @@ function SessionWorkspace(props: {
         translation={state.analysis.translation}
         summary={state.analysis.summary}
         notablePoints={state.analysis.notablePoints}
+        copy={props.copy}
+        copiedId={props.copiedId}
       />
       {state.truncated && (
         <p className="truncated-note">（较早的对话已被省略）</p>
@@ -241,14 +272,20 @@ function ThreadMessageRow(props: {
   copy: (text: string, id: string) => void;
 }) {
   const { message } = props;
+  const id = `m${props.index}`;
   if (message.role === "user") {
     return (
       <div className="thread-message user">
         <div className="bubble">{message.content}</div>
+        <button
+          className="copy-button small"
+          onClick={() => props.copy(message.content, id)}
+        >
+          {props.copiedId === id ? "已复制 ✓" : "复制"}
+        </button>
       </div>
     );
   }
-  const id = `m${props.index}`;
   return (
     <div className="thread-message assistant">
       <div className="judgement">

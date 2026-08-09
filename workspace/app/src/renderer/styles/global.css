@@ -122,11 +122,28 @@ button.primary:hover {
 }
 
 .analysis-section h2 {
-  margin: 0 0 4px;
+  margin: 0;
   font-size: 12px;
   font-weight: 600;
   color: #8a7a4a;
   letter-spacing: 0.02em;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.copy-button.tiny {
+  padding: 2px 8px;
+  font-size: 10px;
+  background: #c4b887;
+}
+
+.copy-button.tiny:hover {
+  background: #94875a;
 }
 
 .analysis-section p {
@@ -169,6 +186,10 @@ button.primary:hover {
   align-self: flex-end;
   background: #e8dfae;
   max-width: 88%;
+}
+
+.thread-message.user .copy-button {
+  align-self: flex-end;
 }
 
 .thread-message.assistant .bubble {
