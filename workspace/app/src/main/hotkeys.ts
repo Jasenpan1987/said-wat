@@ -17,10 +17,11 @@ export type HotkeyReport = Partial<
 >;
 
 // macOS-only product; the default accelerators are the ones agreed in the
-// requirements. "Command+W" is never registered anywhere — it stays the
-// universal close-window shortcut.
+// requirements (G-001 resolved 2026-08-10: capture moved to Cmd+Shift+S —
+// Cmd+Shift+W collided with WeChat on the builder's machine). "Command+W" is
+// never registered anywhere — it stays the universal close-window shortcut.
 export const DEFAULT_HOTKEYS: HotkeyBindings = {
-  capture: "Command+Shift+W",
+  capture: "Command+Shift+S",
   polish: "Command+Shift+E",
 };
 

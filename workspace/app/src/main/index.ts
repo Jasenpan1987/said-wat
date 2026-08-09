@@ -6,6 +6,7 @@ import { initHotkeys, stopHotkeys } from "./hotkeys.js";
 import { startCapture } from "./capture/index.js";
 import { registerIpcHandlers } from "./ipc-handlers.js";
 import { runDemoFlow, runInterpretFlow } from "./interpret-flow.js";
+import { runPolishFlow } from "./polish-flow.js";
 
 const iconPath = path.join(
   import.meta.dirname,
@@ -53,9 +54,10 @@ app.whenReady().then(() => {
         })
         .catch((err) => console.error("[capture] failed:", err));
     },
-    // The polish flow arrives in T-009. Until then the hotkey is registered
-    // but logs its press.
-    onPolish: () => console.log("[hotkeys] polish pressed (flow arrives in T-009)"),
+    // Flow A: clipboard polish (T-009).
+    onPolish: () => {
+      void runPolishFlow();
+    },
   });
 
   // Surface registration failures (e.g. an accelerator held by another app)

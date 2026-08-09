@@ -30,7 +30,7 @@ Intent is determined by **trigger and language, never inferred**:
 
 | Input | Trigger | Intent | Context |
 |---|---|---|---|
-| Screen region | Capture hotkey (`Cmd+Shift+W`) | "What did they say" → interpret | New conversation rooted at the capture |
+| Screen region | Capture hotkey (`Cmd+Shift+S`) | "What did they say" → interpret | New conversation rooted at the capture |
 | Clipboard text | Polish hotkey (`Cmd+Shift+E`) | "Fix my English" → polish | None — always context-free |
 | Text in the note's draft box | Send (`Enter`) | Chinese → judge + translate; English → polish-with-context | The open note's full conversation |
 
@@ -54,7 +54,7 @@ As the user, I want the app to live silently in the menu bar (tray) after launch
 As the user, I want two global hotkeys — one for screenshot capture, one for clipboard polish — that work from any app, so I never have to switch to the utility first.
 
 **Acceptance criteria:**
-- Defaults (proposed, configurable): capture `Cmd+Shift+W`, polish `Cmd+Shift+E`. Neither collides with the universal `Cmd+W` close-window shortcut.
+- Defaults (proposed, configurable): capture `Cmd+Shift+S`, polish `Cmd+Shift+E` (G-001 resolved 2026-08-10: `Cmd+Shift+W` collided with WeChat). Neither collides with the universal `Cmd+W` close-window shortcut.
 - Both are rebindable in settings; a rebound key takes effect immediately.
 - Pressing capture anywhere opens the capture overlay; pressing polish anywhere polishes the current clipboard text.
 - If the same combination is already held by the system, settings warns and keeps the previous binding.

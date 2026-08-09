@@ -1,8 +1,23 @@
-import { useEffect, useState } from "react";
-import type { NoteView } from "../shared/types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { NoteView, SessionMessage, SessionState } from "../shared/types";
 
 export function App() {
   const [view, setView] = useState<NoteView>({ kind: "loading" });
+  const [draft, setDraft] = useState("");
+  const [sent, setSent] = useState(false); // a draft was submitted, awaiting completion
+  const [inlineHint, setInlineHint] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const draftRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const session = view.kind === "session" ? view.state : null;
+
+  // Recover state after a renderer reload (story 8: survives reloads).
+  useEffect(() => {
+    void window.electronAPI.thread.get().then((state) => {
+      if (state) setView({ kind: "session", state });
+    });
+  }, []);
 
   useEffect(() => {
     const unsubscribe = window.electronAPI.note.onShow((payload) =>
@@ -20,11 +35,53 @@ export function App() {
     };
   }, []);
 
+  // Clear the draft once a send round-trip completed successfully.
+  useEffect(() => {
+    if (session && sent && !session.sending && !session.sendError) {
+      setDraft("");
+      setSent(false);
+      setInlineHint(false);
+    }
+    if (session && sent && session.sendError) {
+      setSent(false); // keep the draft text in the box
+    }
+  }, [session, sent]);
+
+  const copy = useCallback((text: string, id: string) => {
+    window.electronAPI.note.copy(text);
+    setCopiedId(id);
+    if (copiedTimer.current) clearTimeout(copiedTimer.current);
+    copiedTimer.current = setTimeout(() => setCopiedId(null), 1500);
+  }, []);
+
+  const send = useCallback(() => {
+    if (!session || session.sending) return;
+    if (!draft.trim()) {
+      setInlineHint(true);
+      return;
+    }
+    window.electronAPI.note.send(draft);
+    setSent(true);
+    setInlineHint(false);
+  }, [session, draft]);
+
+  const onDraftKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Multi-Code ComposeBox convention: Enter sends, Shift+Enter newline.
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  };
+
   return (
     <div className="note">
       <header className="note-header">
         <span className="note-title">said-wat</span>
-        <button className="note-close" title="关闭 (Esc)" onClick={() => window.electronAPI.note.dismiss()}>
+        <button
+          className="note-close"
+          title="关闭 (Esc)"
+          onClick={() => window.electronAPI.note.dismiss()}
+        >
           ✕
         </button>
       </header>
@@ -32,7 +89,7 @@ export function App() {
         {view.kind === "loading" && (
           <div className="note-state">
             <span className="spinner" aria-hidden="true" />
-            <p>分析中…</p>
+            <p>{view.label ?? "分析中…"}</p>
           </div>
         )}
         {view.kind === "error" && (
@@ -44,22 +101,171 @@ export function App() {
           </div>
         )}
         {view.kind === "analysis" && (
-          <div className="analysis">
+          <AnalysisSections
+            translation={view.analysis.translation}
+            summary={view.analysis.summary}
+            notablePoints={view.analysis.notablePoints}
+          />
+        )}
+        {session && (
+          <SessionWorkspace
+            state={session}
+            draft={draft}
+            setDraft={setDraft}
+            setInlineHint={setInlineHint}
+            onDraftKeyDown={onDraftKeyDown}
+            send={send}
+            inlineHint={inlineHint}
+            copiedId={copiedId}
+            copy={copy}
+            draftRef={draftRef}
+          />
+        )}
+        {view.kind === "polish" && (
+          <div className="polish">
             <section className="analysis-section">
-              <h2>全文翻译</h2>
-              <p className="analysis-translation">{view.analysis.translation}</p>
+              <h2>原文</h2>
+              <p className="muted">{view.original}</p>
             </section>
             <section className="analysis-section">
-              <h2>一句话总结</h2>
-              <p>{view.analysis.summary}</p>
+              <h2>润色结果</h2>
+              <p className="polished">{view.polished}</p>
             </section>
-            <section className="analysis-section">
-              <h2>值得注意的点</h2>
-              <p>{view.analysis.notablePoints}</p>
-            </section>
+            <button
+              className="primary copy-button"
+              onClick={() => copy(view.polished, "polish")}
+            >
+              {copiedId === "polish" ? "已复制 ✓" : "复制润色结果"}
+            </button>
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function AnalysisSections(props: {
+  translation: string;
+  summary: string;
+  notablePoints: string;
+}) {
+  return (
+    <div className="analysis">
+      <section className="analysis-section">
+        <h2>全文翻译</h2>
+        <p className="analysis-translation">{props.translation}</p>
+      </section>
+      <section className="analysis-section">
+        <h2>一句话总结</h2>
+        <p>{props.summary}</p>
+      </section>
+      <section className="analysis-section">
+        <h2>值得注意的点</h2>
+        <p>{props.notablePoints}</p>
+      </section>
+    </div>
+  );
+}
+
+function SessionWorkspace(props: {
+  state: SessionState;
+  draft: string;
+  setDraft: (d: string) => void;
+  setInlineHint: (b: boolean) => void;
+  onDraftKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  send: () => void;
+  inlineHint: boolean;
+  copiedId: string | null;
+  copy: (text: string, id: string) => void;
+  draftRef: React.RefObject<HTMLTextAreaElement | null>;
+}) {
+  const { state } = props;
+  return (
+    <div className="session">
+      <AnalysisSections
+        translation={state.analysis.translation}
+        summary={state.analysis.summary}
+        notablePoints={state.analysis.notablePoints}
+      />
+      {state.truncated && (
+        <p className="truncated-note">（较早的对话已被省略）</p>
+      )}
+      {state.messages.length > 0 && (
+        <div className="thread">
+          {state.messages.map((m, i) => (
+            <ThreadMessageRow
+              key={`${i}-${m.content.slice(0, 12)}`}
+              message={m}
+              index={i}
+              copiedId={props.copiedId}
+              copy={props.copy}
+            />
+          ))}
+        </div>
+      )}
+      {state.sending && (
+        <div className="sending">
+          <span className="spinner small" aria-hidden="true" />
+          <span>回复中…</span>
+        </div>
+      )}
+      {state.sendError && <p className="send-error">{state.sendError}</p>}
+      <div className="draft-box">
+        <textarea
+          ref={props.draftRef}
+          value={props.draft}
+          onChange={(e) => {
+            props.setDraft(e.target.value);
+            if (e.target.value.trim()) props.setInlineHint(false);
+          }}
+          onKeyDown={props.onDraftKeyDown}
+          placeholder="用中文或英文输入你的回复…（Enter 发送，Shift+Enter 换行）"
+          rows={3}
+          disabled={state.sending}
+        />
+        <div className="draft-actions">
+          {props.inlineHint && <span className="inline-hint">内容不能为空</span>}
+          <button className="primary" onClick={props.send} disabled={state.sending}>
+            发送
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ThreadMessageRow(props: {
+  message: SessionMessage;
+  index: number;
+  copiedId: string | null;
+  copy: (text: string, id: string) => void;
+}) {
+  const { message } = props;
+  if (message.role === "user") {
+    return (
+      <div className="thread-message user">
+        <div className="bubble">{message.content}</div>
+      </div>
+    );
+  }
+  const id = `m${props.index}`;
+  return (
+    <div className="thread-message assistant">
+      <div className="judgement">
+        {message.answered === true
+          ? "已回答 ✓"
+          : message.answered === false
+            ? "未回答 ⚠"
+            : ""}
+      </div>
+      {message.warning && <div className="warning">{message.warning}</div>}
+      <div className="bubble">{message.content}</div>
+      <button
+        className="copy-button small"
+        onClick={() => props.copy(message.content, id)}
+      >
+        {props.copiedId === id ? "已复制 ✓" : "复制"}
+      </button>
     </div>
   );
 }

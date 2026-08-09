@@ -52,7 +52,7 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 
 ### T-006: Thread store (main-process memory)
 - **Type:** data
-- **Status:** ready
+- **Status:** done (2026-08-10)
 - **Requirement:** `docs/work/said-wat/requirements.md#story-8-memory`
 - **Knowledge:** `docs/knowledge/architecture.md#flows`
 - **Code:** `workspace/app/src/main/thread-store.ts`
@@ -80,7 +80,7 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 
 ### T-009: Flow A — clipboard polish
 - **Type:** feature
-- **Status:** backlog
+- **Status:** done (2026-08-10)
 - **Requirement:** `docs/work/said-wat/requirements.md#story-6-flow-a`
 - **Code:** `workspace/app/src/main/` (polish flow), `workspace/app/src/renderer/` (result view + copy)
 - **Description:** Polish hotkey → `clipboard.readText()` → `polishText` → note shows original + polished version + **copy button**; copy writes back via `clipboard.writeText()` with a brief "copied" confirmation. Empty or non-text clipboard → clear message, no request. Failure leaves the clipboard original untouched. Context-free by design (never joins a thread).
@@ -89,7 +89,7 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 
 ### T-010: Flow B — draft box + judged translation
 - **Type:** feature
-- **Status:** backlog
+- **Status:** done (2026-08-10)
 - **Requirement:** `docs/work/said-wat/requirements.md#story-7-flow-b`, `docs/work/said-wat/requirements.md#intent-routing`
 - **Code:** `workspace/app/src/renderer/` (draft box, thread view), `workspace/app/src/main/` (reply flow)
 - **Description:** Multi-line draft box in the note (`Enter` sends, `Shift+Enter` newline — Multi-Code ComposeBox convention). Send → `replyWithContext({analysis, thread, draft})` → append result to the thread, render: judgement line ("answered" / "not answered"), the reply, and a copy button; warning line rendered when present. English draft → polish-with-context (no translation step). Empty draft → inline hint, no request. Failure keeps the draft text in the box.

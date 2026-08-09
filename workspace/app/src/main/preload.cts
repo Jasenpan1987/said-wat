@@ -23,5 +23,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     },
     dismiss: () => ipcRenderer.send("note-dismiss"),
     retry: () => ipcRenderer.send("note-retry"),
+    send: (draft) => ipcRenderer.send("note-send", draft),
+    copy: (text) => ipcRenderer.send("note-copy", text),
+  },
+  thread: {
+    get: () => ipcRenderer.invoke("thread-get"),
   },
 });

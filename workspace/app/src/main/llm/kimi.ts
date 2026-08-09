@@ -3,7 +3,7 @@ import type {
   ChatCompletionCreateParamsNonStreaming,
   ChatCompletionMessageParam,
 } from "openai/resources/chat/completions";
-import type { InterpretResult } from "../../shared/types.js";
+import type { InterpretResult, ThreadMessage } from "../../shared/types.js";
 import {
   INTERPRET_SYSTEM_PROMPT,
   POLISH_SYSTEM_PROMPT,
@@ -11,16 +11,12 @@ import {
 } from "./prompts.js";
 
 export type { InterpretResult } from "../../shared/types.js";
+export type { ThreadMessage } from "../../shared/types.js";
 
 export interface ReplyResult {
   answered: boolean;
   warning: string | null;
   reply: string;
-}
-
-export interface ThreadMessage {
-  role: "user" | "assistant";
-  content: string;
 }
 
 export type LlmErrorCode =

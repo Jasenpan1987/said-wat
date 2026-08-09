@@ -41,11 +41,34 @@ export interface CaptureConfirmPayload {
   rect: Rect;
 }
 
+/** A single exchange in the conversation thread. */
+export interface ThreadMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+/** Assistant replies carry the Flow-B judgement (Story 7). */
+export interface SessionMessage extends ThreadMessage {
+  answered?: boolean;
+  warning?: string | null;
+}
+
+/** Full state of the reply workspace in the note. */
+export interface SessionState {
+  analysis: InterpretResult;
+  messages: SessionMessage[];
+  truncated: boolean;
+  sending: boolean;
+  sendError: string | null;
+}
+
 /** Content shown in the sticky note. */
 export type NoteView =
-  | { kind: "loading" }
+  | { kind: "loading"; label?: string }
   | { kind: "error"; message: string }
-  | { kind: "analysis"; analysis: InterpretResult };
+  | { kind: "analysis"; analysis: InterpretResult }
+  | { kind: "session"; state: SessionState }
+  | { kind: "polish"; original: string; polished: string };
 
 /** Sent main → note renderer whenever the note content changes. */
 export interface NoteShowPayload {
@@ -69,5 +92,13 @@ export interface ElectronAPI {
     dismiss: () => void;
     /** Retry the last failed analysis (wired up in T-008). */
     retry: () => void;
+    /** Send a draft from the reply workspace (Flow B). */
+    send: (draft: string) => void;
+    /** Copy text to the clipboard (polish result / a reply). */
+    copy: (text: string) => void;
+  };
+  thread: {
+    /** Fetch the current conversation snapshot (recovery after reload). */
+    get: () => Promise<SessionState | null>;
   };
 }
