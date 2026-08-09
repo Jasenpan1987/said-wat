@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from "electron";
 import path from "path";
+import { loadDotEnv } from "./env.js";
 import { createTray } from "./tray.js";
 import { initHotkeys, stopHotkeys } from "./hotkeys.js";
 import { startCapture } from "./capture/index.js";
@@ -9,6 +10,10 @@ const iconPath = path.join(
   import.meta.dirname,
   "../renderer/assets/tray-icon.png"
 );
+
+// Dev convenience: load `MOONSHOT_API_KEY` from the repo-root `.env` before
+// anything reads the environment (no-op when the file is absent or packaged).
+loadDotEnv();
 
 // Single-instance guard: a second launch tells the running instance about
 // itself and then exits. Must run before app 'ready'.
