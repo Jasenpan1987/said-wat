@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { screen } from "electron";
+import { nativeImage, screen } from "electron";
 import type { CaptureResult, Rect } from "../shared/types.js";
 import { interpretImage } from "./llm/kimi.js";
 import { showNote } from "./note-window.js";
@@ -13,6 +13,27 @@ import { friendlyError } from "./ui-errors.js";
 function modelFromEnv(): string | undefined {
   const model = process.env.SAIDWAT_MODEL;
   return model && model.trim() !== "" ? model.trim() : undefined;
+}
+
+// Screenshot interpretations are the slow path (a retina capture can take
+// 30s+ at full size). The vision model reads text, not pixels — 1024px on
+// the long edge keeps chat bubbles legible while cutting upload + vision
+// time to ~1/3 of the original (measured 2026-08-10).
+const MAX_IMAGE_DIM = 1024;
+
+/**
+ * Downsizes an over-large captured PNG before it goes to the vision model.
+ * Returns the original base64 untouched when already within the limit.
+ */
+export function downscaleForVision(base64: string): string {
+  const img = nativeImage.createFromBuffer(Buffer.from(base64, "base64"));
+  if (img.isEmpty()) return base64;
+  const { width, height } = img.getSize();
+  if (Math.max(width, height) <= MAX_IMAGE_DIM) return base64;
+  const resized = img.resize(
+    width >= height ? { width: MAX_IMAGE_DIM } : { height: MAX_IMAGE_DIM }
+  );
+  return resized.toPNG().toString("base64");
 }
 
 let lastImage: { base64: string; mimeType: string; rect: Rect; displayId: number } | null =
@@ -35,7 +56,7 @@ export async function runInterpretFlow(result: CaptureResult): Promise<void> {
     { rect: result.rect, displayId: result.displayId }
   );
   try {
-    const analysis = await interpretImage(result.base64, result.mimeType, {
+    const analysis = await interpretImage(downscaleForVision(result.base64), result.mimeType, {
       model: modelFromEnv(),
     });
     setThreadRoot(analysis);
@@ -53,7 +74,7 @@ export async function retryLastInterpret(): Promise<void> {
   if (!lastImage) return;
   showNote({ view: { kind: "loading", label: "分析中" } });
   try {
-    const analysis = await interpretImage(lastImage.base64, lastImage.mimeType, {
+    const analysis = await interpretImage(downscaleForVision(lastImage.base64), lastImage.mimeType, {
       model: modelFromEnv(),
     });
     setThreadRoot(analysis);
