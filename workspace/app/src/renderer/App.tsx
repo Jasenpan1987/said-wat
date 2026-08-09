@@ -124,7 +124,7 @@ export function App() {
         {view.kind === "loading" && (
           <div className="note-state">
             <span className="spinner" aria-hidden="true" />
-            <p>{view.label ?? "分析中…"}</p>
+            <p>{view.label ?? "分析中"}<span className="dots" aria-hidden="true" /></p>
           </div>
         )}
         {view.kind === "error" && (
@@ -220,6 +220,16 @@ function PolishWorkspace(props: {
   copy: (text: string, id: string) => void;
 }) {
   const { state } = props;
+  // First (automatic) polish round: a full centered working indicator —
+  // exactly like translation, so it is never missed or below the fold.
+  if (state.sending && state.revisions.length === 0) {
+    return (
+      <div className="note-state">
+        <span className="spinner" aria-hidden="true" />
+        <p>润色中<span className="dots" aria-hidden="true" /></p>
+      </div>
+    );
+  }
   return (
     <div className="polish">
       <section className="analysis-section">
@@ -256,7 +266,7 @@ function PolishWorkspace(props: {
       {state.sending && (
         <div className="sending">
           <span className="spinner small" aria-hidden="true" />
-          <span>润色中…</span>
+          <span>润色中<span className="dots" aria-hidden="true" /></span>
         </div>
       )}
       {state.error && (
@@ -345,7 +355,7 @@ function SessionWorkspace(props: {
       {state.sending && (
         <div className="sending">
           <span className="spinner small" aria-hidden="true" />
-          <span>回复中…</span>
+          <span>回复中<span className="dots" aria-hidden="true" /></span>
         </div>
       )}
       {state.sendError && <p className="send-error">{state.sendError}</p>}

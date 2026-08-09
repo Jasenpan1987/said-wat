@@ -31,7 +31,7 @@ export async function runInterpretFlow(result: CaptureResult): Promise<void> {
     displayId: result.displayId,
   };
   showNote(
-    { view: { kind: "loading", label: "分析中…" } },
+    { view: { kind: "loading", label: "分析中" } },
     { rect: result.rect, displayId: result.displayId }
   );
   try {
@@ -51,7 +51,7 @@ export async function runInterpretFlow(result: CaptureResult): Promise<void> {
 /** Retry (note's retry button): re-send the last captured image. */
 export async function retryLastInterpret(): Promise<void> {
   if (!lastImage) return;
-  showNote({ view: { kind: "loading", label: "分析中…" } });
+  showNote({ view: { kind: "loading", label: "分析中" } });
   try {
     const analysis = await interpretImage(lastImage.base64, lastImage.mimeType, {
       model: modelFromEnv(),
