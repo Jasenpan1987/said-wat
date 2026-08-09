@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   capture: {
     confirm: (payload) => ipcRenderer.send("capture-confirm", payload),
     cancel: () => ipcRenderer.send("capture-cancel"),
+    ready: () => ipcRenderer.send("capture-ready"),
     onInit: (callback) => {
       const listener = (_event, payload) => callback(payload);
       ipcRenderer.on("capture-init", listener);

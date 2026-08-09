@@ -57,6 +57,8 @@ export interface ElectronAPI {
   capture: {
     confirm: (payload: CaptureConfirmPayload) => void;
     cancel: () => void;
+    /** Tells main the overlay mounted and got its init payload. */
+    ready: () => void;
     /** Subscribe to the overlay init payload; returns an unsubscribe fn. */
     onInit: (callback: (payload: OverlayInitPayload) => void) => () => void;
   };

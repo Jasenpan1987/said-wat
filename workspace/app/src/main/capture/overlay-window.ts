@@ -25,7 +25,9 @@ export function createOverlayWindow(display: Electron.Display): BrowserWindow {
     enableLargerThanScreen: true,
     show: false,
     webPreferences: {
-      preload: path.join(import.meta.dirname, "preload.cjs"),
+      // This module compiles to dist/main/capture/ — one level up for the
+      // shared preload, two for the renderer output.
+      preload: path.join(import.meta.dirname, "../preload.cjs"),
       contextIsolation: true,
       nodeIntegration: false,
     },
@@ -35,6 +37,6 @@ export function createOverlayWindow(display: Electron.Display): BrowserWindow {
   win.setAlwaysOnTop(true, "screen-saver");
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
-  void win.loadFile(path.join(import.meta.dirname, "../renderer/overlay.html"));
+  void win.loadFile(path.join(import.meta.dirname, "../../renderer/overlay.html"));
   return win;
 }

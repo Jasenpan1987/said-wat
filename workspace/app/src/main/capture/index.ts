@@ -84,6 +84,8 @@ async function doCapture(): Promise<CaptureResult | null> {
 
   return new Promise<CaptureResult | null>((resolve) => {
     let settled = false;
+    let readyReceived = false;
+    let watchdog: NodeJS.Timeout | null = null;
 
     const windows = new Map<BrowserWindow, number>();
     for (const [displayId, snap] of snapshots) {
@@ -99,6 +101,19 @@ async function doCapture(): Promise<CaptureResult | null> {
           interactive: displayId === interactiveDisplayId,
         });
       });
+      // Failsafe: if the overlay renderer fails to load or crashes, tear the
+      // overlay down instead of leaving the user with a dead fullscreen
+      // window they cannot dismiss (a black-screen trap).
+      win.webContents.on("did-fail-load", (_e, errorCode, errorDescription, validatedURL, isMainFrame) => {
+        if (isMainFrame && errorCode !== -3) {
+          console.error(`[capture] overlay failed to load (${errorCode} ${errorDescription})`);
+          finish(null);
+        }
+      });
+      win.webContents.on("render-process-gone", (_e, details) => {
+        console.error("[capture] overlay renderer gone:", details.reason);
+        finish(null);
+      });
       // A window closed out-of-band (never expected in normal use) must not
       // leave the capture promise hanging.
       win.on("closed", () => finish(null));
@@ -107,6 +122,7 @@ async function doCapture(): Promise<CaptureResult | null> {
     const finish = (result: CaptureResult | null) => {
       if (settled) return;
       settled = true;
+      if (watchdog) clearTimeout(watchdog);
       for (const win of windows.keys()) {
         if (!win.isDestroyed()) win.destroy();
       }
@@ -114,12 +130,30 @@ async function doCapture(): Promise<CaptureResult | null> {
       resolve(result);
     };
 
+    // Ready handshake: the renderer replies capture-ready once it mounted and
+    // received init. If it never does (preload failure, renderer crash, …)
+    // the overlay is torn down instead of trapping the user on a black screen.
+    const onReady = () => {
+      readyReceived = true;
+      console.log("[capture] overlay ready");
+    };
+    ipcMain.on("capture-ready", onReady);
+    watchdog = setTimeout(() => {
+      if (!readyReceived) {
+        console.error("[capture] overlay never became ready — tearing down");
+        finish(null);
+      }
+    }, 6000);
+
     const onConfirm = (
       _event: Electron.IpcMainEvent,
       payload: { displayId: number; rect: Rect }
     ) => {
       const snap = snapshots.get(payload.displayId);
-      if (!snap) return; // unknown display — ignore, keep waiting
+      if (!snap) {
+        console.error("[capture] confirm for unknown display", payload.displayId);
+        return; // unknown display — ignore, keep waiting
+      }
       if (payload.rect.width < MIN_SELECTION || payload.rect.height < MIN_SELECTION) {
         finish(null);
         return;
@@ -135,9 +169,13 @@ async function doCapture(): Promise<CaptureResult | null> {
       }
       const cropped = snap.thumbnail.crop(physical);
       if (cropped.isEmpty()) {
+        console.error("[capture] crop produced an empty image");
         finish(null);
         return;
       }
+      console.log(
+        `[capture] confirmed ${payload.rect.width}x${payload.rect.height} on display ${payload.displayId}`
+      );
       finish({
         base64: cropped.toPNG().toString("base64"),
         mimeType: "image/png",
@@ -145,13 +183,17 @@ async function doCapture(): Promise<CaptureResult | null> {
         displayId: payload.displayId,
       });
     };
-    const onCancel = () => finish(null);
+    const onCancel = () => {
+      console.log("[capture] cancelled by user");
+      finish(null);
+    };
 
     ipcMain.on("capture-confirm", onConfirm);
     ipcMain.on("capture-cancel", onCancel);
     const cleanup = () => {
       ipcMain.removeListener("capture-confirm", onConfirm);
       ipcMain.removeListener("capture-cancel", onCancel);
+      ipcMain.removeListener("capture-ready", onReady);
     };
 
     for (const [win, displayId] of windows) {

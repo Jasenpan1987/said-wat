@@ -24,7 +24,10 @@ export function Overlay() {
   const liveSizeRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    return window.electronAPI.capture.onInit(setPayload);
+    return window.electronAPI.capture.onInit((payload) => {
+      setPayload(payload);
+      window.electronAPI.capture.ready();
+    });
   }, []);
 
   const confirm = useCallback((rect: Rect) => {
