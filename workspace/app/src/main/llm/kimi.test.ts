@@ -64,7 +64,7 @@ describe("client setup", () => {
     stubResponse(FIXTURE);
     const result = await interpretImage(IMAGE, "image/png");
     expect(result.translation).toContain("翻译内容");
-    expect(mockClientOptions[0].baseURL).toBe("https://api.moonshot.ai/v1");
+    expect(mockClientOptions[0].baseURL).toBe("https://api.moonshot.cn/v1");
     expect(mockClientOptions[0].apiKey).toBe("later-key");
   });
 
