@@ -3,17 +3,14 @@ import type {
   ChatCompletionCreateParamsNonStreaming,
   ChatCompletionMessageParam,
 } from "openai/resources/chat/completions";
+import type { InterpretResult } from "../../shared/types.js";
 import {
   INTERPRET_SYSTEM_PROMPT,
   POLISH_SYSTEM_PROMPT,
   REPLY_SYSTEM_PROMPT,
 } from "./prompts.js";
 
-export interface InterpretResult {
-  translation: string;
-  summary: string;
-  notablePoints: string;
-}
+export type { InterpretResult } from "../../shared/types.js";
 
 export interface ReplyResult {
   answered: boolean;

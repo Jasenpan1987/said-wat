@@ -3,6 +3,7 @@ import path from "path";
 import { createTray } from "./tray.js";
 import { initHotkeys, stopHotkeys } from "./hotkeys.js";
 import { startCapture } from "./capture/index.js";
+import { registerNoteIpc } from "./note-window.js";
 
 const iconPath = path.join(
   import.meta.dirname,
@@ -33,6 +34,7 @@ app.on("second-instance", () => {
 
 app.whenReady().then(() => {
   tray = createTray(iconPath);
+  registerNoteIpc();
   initHotkeys({
     onCapture: () => {
       void startCapture()

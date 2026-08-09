@@ -1,5 +1,12 @@
 // Shared types between main, preload and renderer.
 
+/** The three-section screenshot interpretation (Story 4). */
+export interface InterpretResult {
+  translation: string;
+  summary: string;
+  notablePoints: string;
+}
+
 export interface Rect {
   x: number;
   y: number;
@@ -34,6 +41,17 @@ export interface CaptureConfirmPayload {
   rect: Rect;
 }
 
+/** Content shown in the sticky note. */
+export type NoteView =
+  | { kind: "loading" }
+  | { kind: "error"; message: string }
+  | { kind: "analysis"; analysis: InterpretResult };
+
+/** Sent main → note renderer whenever the note content changes. */
+export interface NoteShowPayload {
+  view: NoteView;
+}
+
 /** API exposed by the preload under `window.electronAPI`. */
 export interface ElectronAPI {
   capture: {
@@ -41,5 +59,13 @@ export interface ElectronAPI {
     cancel: () => void;
     /** Subscribe to the overlay init payload; returns an unsubscribe fn. */
     onInit: (callback: (payload: OverlayInitPayload) => void) => () => void;
+  };
+  note: {
+    /** Subscribe to note content updates; returns an unsubscribe fn. */
+    onShow: (callback: (payload: NoteShowPayload) => void) => () => void;
+    /** Dismiss the note (✕ or Esc in the note). */
+    dismiss: () => void;
+    /** Retry the last failed analysis (wired up in T-008). */
+    retry: () => void;
   };
 }

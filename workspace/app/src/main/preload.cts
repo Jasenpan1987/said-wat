@@ -14,4 +14,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
       return () => ipcRenderer.removeListener("capture-init", listener);
     },
   },
+  note: {
+    onShow: (callback) => {
+      const listener = (_event, payload) => callback(payload);
+      ipcRenderer.on("note-show", listener);
+      return () => ipcRenderer.removeListener("note-show", listener);
+    },
+    dismiss: () => ipcRenderer.send("note-dismiss"),
+    retry: () => ipcRenderer.send("note-retry"),
+  },
 });

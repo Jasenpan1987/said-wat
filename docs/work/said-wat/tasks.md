@@ -62,7 +62,7 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 
 ### T-007: Sticky-note popup shell
 - **Type:** feature
-- **Status:** ready
+- **Status:** done (2026-08-10)
 - **Requirement:** `docs/work/said-wat/requirements.md#story-5-sticky-note`
 - **Code:** `workspace/app/src/renderer/` (note window), `workspace/app/src/main/note-window.ts`
 - **Description:** Frameless always-on-top compact window. Shown without stealing keyboard focus (hidden/show without focus or `visibleOnAllWorkspaces` + no-activate). Draggable header; dismiss via ✕ or `Esc`. Renders the three analysis sections, a loading state, and error + retry. Single note instance reused across flows (capture/interpret, polish). Positioned near the selection on the same display, never covering the selection.
