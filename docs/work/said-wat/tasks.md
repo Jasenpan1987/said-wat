@@ -24,7 +24,7 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 
 ### T-003: Tray + app lifecycle
 - **Type:** feature
-- **Status:** ready
+- **Status:** done (2026-08-10)
 - **Requirement:** `docs/work/said-wat/requirements.md#story-1-tray-lifecycle`
 - **Code:** `workspace/app/src/main/` (index.ts, tray)
 - **Description:** Single-instance guard (`app.requestSingleInstanceLock`). Tray icon + menu (Open Settings, Quit). No window at launch. App stays alive when the sticky note is closed. Quit from tray ends all processes. Settings menu item is a stub until T-011.
