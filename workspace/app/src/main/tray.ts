@@ -9,7 +9,8 @@ import { Menu, Tray, app, nativeImage } from "electron";
  */
 export function createTray(iconPath: string, onOpenSettings: () => void): Tray {
   const icon = nativeImage.createFromPath(iconPath);
-  icon.setTemplateImage(true);
+  // Colored psyduck icon (docs/psyduck.webp, background removed) — NOT a
+  // template image, so the yellow duck shows as-is in the menu bar.
 
   const tray = new Tray(icon);
   tray.setToolTip("said-wat");
