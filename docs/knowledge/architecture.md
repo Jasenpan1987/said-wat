@@ -22,6 +22,22 @@
 
 ## Flows
 
+```mermaid
+flowchart TD
+    A[全局热键] --> B[截屏选区 dim + drag-select]
+    B --> C[裁剪 → base64]
+    C --> D[Kimi 视觉 · 非思考模式]
+    D --> E[翻译 / 摘要 / 要点]
+    E --> F[便签弹窗展示]
+
+    F --> G{用户操作}
+    G -->|A: 英文润色| H[Kimi 文本润色]
+    G -->|B: 中文意图| I[Kimi 带上下文翻译+判断]
+    H --> J[结果 + 复制按钮]
+    I --> J
+    J --> F
+```
+
 ### Part 1 — screenshot interpret
 
 1. Global hotkey → screen-capture overlay (WeChat desktop UX clone: dim + drag-select; Electron fullscreen overlay + `desktopCapturer`, requires Screen Recording permission).
