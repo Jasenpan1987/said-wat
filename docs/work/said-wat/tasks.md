@@ -143,3 +143,12 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 - **Description:** Provider list (OpenAI / Kimi / DeepSeek / Qwen / GLM, OpenAI-compatible) + model dropdown + API-key field + test-connection in Settings; `kimi.ts` becomes config-driven (base URL / key env / model list / vision + thinking flags); key stored per provider (storage decision pending, see story 10); vision check for capture; env key stays as dev fallback.
 - **Acceptance:** (story 10 acceptance criteria once the 4 open decisions are signed off)
 - **Blocks:** none · **Blocked by:** T-011 · **Parallel with:** none
+
+### T-016: De-AI the polish output (Flow A quality)
+- **Type:** tweak
+- **Status:** done (2026-08-17)
+- **Requirement:** `docs/work/said-wat/requirements.md#story-6-flow-a`
+- **Code:** `workspace/app/src/main/llm/prompts.ts`, `workspace/app/src/main/llm/kimi.test.ts`
+- **Description:** Builder feedback: polished work-chat text reads as obviously AI-written. Root cause: the old prompt ("rewrite into idiomatic, natural English") pushed the model toward formalising, upgrading vocabulary, and adding transitions/filler. New `POLISH_SYSTEM_PROMPT` switches to minimal-edit: fix only grammar/spelling/punctuation/confusing wording, keep the writer's voice (sentence length, formality, word choices), and explicitly forbid vocabulary upgrades, politeness filler ("hope this helps"…), added transitions/openings/closings, longer text, and flawless textbook English; contractions expected. Verified live against the real API: casual drafts come back nearly untouched (only real fixes), informal style preserved.
+- **Acceptance:** live probe shows near-minimal edits on casual drafts; `pnpm type && pnpm lint && pnpm test` green (67 tests).
+- **Blocks:** none · **Blocked by:** T-014 · **Parallel with:** none

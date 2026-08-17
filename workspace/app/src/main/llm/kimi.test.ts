@@ -219,7 +219,7 @@ describe("method behaviour", () => {
     const result = await polishText("this is the original");
     expect(result).toBe("This is the polished version.");
     const params = mockCreate.mock.calls[0][0];
-    expect(params.messages[0].content).toContain("English writing assistant");
+    expect(params.messages[0].content).toContain("natural human writing");
     expect(params.messages[1].content).toBe("this is the original");
   });
 
