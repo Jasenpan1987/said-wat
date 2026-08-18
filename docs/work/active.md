@@ -16,7 +16,7 @@
 - WeChat-style capture: dim → drag-select → ✓/Enter/**double-click anywhere** confirms, Esc cancels; failsafes prevent the black-screen trap; real 2-display capture verified.
 - Capture → Kimi vision (default `kimi-k2.6` non-thinking, ~13s) → sticky note 翻译/总结/要点, each copyable.
 - Reply workspace: draft box (Enter send / Shift+Enter newline), Chinese intent → judged English reply ("已回答 ✓"/"未回答 ⚠" + warning), thread memory (cap 20 + truncated flag), copy buttons on every text block.
-- Flow A: copy text → `Cmd+Shift+E` → polished version + copy; clipboard untouched until user copies.
+- Flow A: select text in any app → `Cmd+Shift+E` → polished version + copy (T-017: no Cmd+C needed; clipboard fallback; needs Accessibility permission — dialog explains once when missing, clipboard still works).
 - `.env` workflow (`.env.example` committed, `.env` gitignored, dev loader), key never in repo.
 - **Settings window (T-011):** tray → Settings… — hotkey rebinding (press-the-combo; conflicts keep previous + show reason; ⌘W/⌘Q reserved), model select (kimi-k2.6 default / kimi-k2.7-code), test-connection (models ping), API-key status indicator. Persisted to `~/Library/Application Support/said-wat/settings.json` (Multi-Code userData convention).
 - **Interactive polish (T-014):** Flow A now has a feedback box AFTER the first automatic result — multi-round revisions, each version copyable; first round shows a centered animated "润色中…" indicator; `Cmd+Shift+E` starts a fresh session.
@@ -35,7 +35,8 @@
 - Checks: `pnpm build && pnpm lint && pnpm type && pnpm test` (51 tests). Commit messages English.
 
 **Next tasks (pick with the builder):**
-0. **T-015 Multi-provider model support (recorded, NOT started)** — Story 10 in `requirements.md`: provider list (OpenAI/Kimi/DeepSeek/Qwen/GLM) + model dropdown + paste-API-key-in-Settings. 4 open design decisions pending builder sign-off (key storage, provider scope, non-vision model behaviour, key precedence) — see story 10 / G-004. Builder explicitly said don't start yet.
+0. **T-017 done 2026-08-18** — Flow A polish reads the selected text (no Cmd+C); verify live: grant Accessibility to the app, select text in an app, press `Cmd+Shift+E` (was working on clipboard before).
+1. **T-015 Multi-provider model support (recorded, NOT started)** — Story 10 in `requirements.md`: provider list (OpenAI/Kimi/DeepSeek/Qwen/GLM) + model dropdown + paste-API-key-in-Settings. 4 open design decisions pending builder sign-off (key storage, provider scope, non-vision model behaviour, key precedence) — see story 10 / G-004. Builder explicitly said don't start yet.
 1. **T-012 qa boundary review** (next): manual items accumulated — tray Quit click, note focus behaviour, real capture UX on the builder's dual monitors, judgement accuracy, settings window walk-through, **packaged-app env story — note: a stored API key (Story 10) would also solve this**.
 2. **T-013 Package dmg** — after qa; needs the icon + version bump chore convention.
 

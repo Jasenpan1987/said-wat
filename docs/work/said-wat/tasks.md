@@ -144,6 +144,16 @@ Sizing: one task = one focused coding-agent session. Statuses: backlog | ready |
 - **Acceptance:** (story 10 acceptance criteria once the 4 open decisions are signed off)
 - **Blocks:** none · **Blocked by:** T-011 · **Parallel with:** none
 
+### T-017: Flow A — polish the mouse-selected text (no Cmd+C needed)
+- **Type:** feature
+- **Status:** done (2026-08-18)
+- **Requirement:** `docs/work/said-wat/requirements.md#story-6-flow-a`
+- **Knowledge:** `docs/knowledge/tech-conventions.md#code-style`, `docs/knowledge/architecture.md#flows`
+- **Code:** `workspace/app/src/main/selected-text.ts` (new), `workspace/app/src/main/polish-flow.ts`
+- **Description:** Flow A now polishes the text **selected in the frontmost app** instead of requiring a prior Cmd+C. `selected-text.ts` reads `AXSelectedText` of the frontmost app's focused element via `osascript` (System Events, no new npm dependency), falling back to the classic simulated-Cmd+C (keystroke → read clipboard → restore previous text/image) for apps that don't expose the AX attribute. Clipboard is the fallback when nothing is selected. Accessibility permission (TCC) is checked via `systemPreferences.isTrustedAccessibilityClient`; when missing AND the clipboard is also empty, a dialog mirrors the Screen Recording flow and opens System Settings → Privacy & Security → Accessibility — clipboard polish keeps working without the grant. Empty-source message updated to mention selection first.
+- **Acceptance:** selection → `Cmd+Shift+E` polishes without Cmd+C; no selection → old clipboard behaviour; empty → clear message; no permission → dialog (clipboard unaffected); simulated copy restores the pre-existing clipboard (text and image); `pnpm type && pnpm lint && pnpm test` green (77 tests, 10 new).
+- **Blocks:** none · **Blocked by:** T-009 (Flow A) · **Parallel with:** none
+
 ### T-016: De-AI the polish output (Flow A quality)
 - **Type:** tweak
 - **Status:** done (2026-08-17)

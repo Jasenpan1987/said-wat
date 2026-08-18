@@ -3,6 +3,11 @@ import type { PolishState } from "../shared/types.js";
 import { polishText, polishWithFeedback } from "./llm/kimi.js";
 import { showNote } from "./note-window.js";
 import { appendRevision, getPolish, startPolish } from "./polish-store.js";
+import {
+  hasAccessibilityPermission,
+  readSelectedText,
+  showAccessibilityDialog,
+} from "./selected-text.js";
 import { friendlyError } from "./ui-errors.js";
 
 // The feedback of the in-flight revision round. Kept across a failure so the
@@ -19,19 +24,20 @@ function pushPolish(overrides: Partial<PolishState> = {}): void {
 }
 
 /**
- * Flow A (Story 6): polish hotkey → read the clipboard → Kimi polish →
- * the note shows the original + result + feedback box (T-014 interactive
- * revisions). A fresh press always starts a new session from the current
- * clipboard. Context-free by design — never joins a conversation thread.
+ * Flow A (Story 6): polish hotkey → read the selected text (T-017, fallback
+ * to the clipboard) → Kimi polish → the note shows the original + result +
+ * feedback box (T-014 interactive revisions). A fresh press always starts a
+ * new session. Context-free by design — never joins a conversation thread.
  */
 export async function runPolishFlow(): Promise<void> {
-  const text = clipboard.readText();
+  const text = await resolvePolishSource();
   if (!text.trim()) {
     showNote({
       view: {
         kind: "error",
         message:
-          "剪贴板为空或不是文本，无法润色。先复制一段英文，再按 Cmd+Shift+E。",
+          "没有选中文字，剪贴板也为空或不是文本，无法润色。" +
+          "先用鼠标选中一段英文，或复制一段英文，再按 Cmd+Shift+E。",
       },
     });
     return;
@@ -50,6 +56,22 @@ export async function runPolishFlow(): Promise<void> {
       { origin: "polish" }
     );
   }
+}
+
+/**
+ * Flow A source (T-017): the text selected in the frontmost app when there
+ * is one (and Accessibility is granted), otherwise the current clipboard.
+ * When both are missing and Accessibility isn't granted, explain the
+ * permission so the selection feature can be enabled.
+ */
+async function resolvePolishSource(): Promise<string> {
+  const selected = await readSelectedText();
+  if (selected) return selected;
+  const text = clipboard.readText();
+  if (!text.trim() && !hasAccessibilityPermission()) {
+    await showAccessibilityDialog();
+  }
+  return text;
 }
 
 /** Flow A revision round (T-014): user feedback → revised version. */

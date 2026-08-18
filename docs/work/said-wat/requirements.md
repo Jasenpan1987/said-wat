@@ -2,7 +2,7 @@
 
 > **Purpose:** What said-wat delivers, in testable user stories.
 > **Status:** Current
-> **Version:** 1.2 · 2026-08-09
+> **Version:** 1.4 · 2026-08-18
 > **Sources:** `docs/knowledge/project.md`, `docs/knowledge/architecture.md`, `docs/records/meetings/2026-08-09_alignment-said-wat.md`, `docs/records/decisions/ADR-001-stack-and-provider.md`
 
 ## 1. What this delivers and why
@@ -31,7 +31,7 @@ Intent is determined by **trigger and language, never inferred**:
 | Input | Trigger | Intent | Context |
 |---|---|---|---|
 | Screen region | Capture hotkey (`Cmd+Shift+S`) | "What did they say" → interpret | New conversation rooted at the capture |
-| Clipboard text | Polish hotkey (`Cmd+Shift+E`) | "Fix my English" → polish | None — always context-free |
+| Selected text (frontmost app, T-017) or clipboard | Polish hotkey (`Cmd+Shift+E`) | "Fix my English" → polish | None — always context-free |
 | Text in the note's draft box | Send (`Enter`) | Chinese → judge + translate; English → polish-with-context | The open note's full conversation |
 
 A note is **one conversation**: everything sent inside it carries the capture analysis plus all prior exchanges. A new capture starts a **new** conversation (previous thread cleared). Polish is standalone and never joins a thread.
@@ -110,23 +110,27 @@ As the user, I want the result in a small always-on-top popup that stays while I
 **Edge cases:**
 - Multiple sequential captures → the newest analysis starts a fresh thread (the previous thread is cleared) — deliberate: a new capture means a new conversation context.
 
-### Story 6 — Flow A: clipboard polish {#story-6-flow-a}
+### Story 6 — Flow A: selected-text / clipboard polish {#story-6-flow-a}
 
-As the user, I want to copy any English text and press the polish hotkey to get an idiomatic version with a copy button, so I can paste a dependable reply back into my chat.
+As the user, I want to select any English text and press the polish hotkey to get an idiomatic version with a copy button — without needing to copy it first — so I can paste a dependable reply back into my chat.
 
 **Acceptance criteria:**
-- Pressing the polish hotkey reads the current clipboard text and sends it to Kimi (text, non-thinking) for English polishing.
+- Pressing the polish hotkey reads the text **selected in the frontmost app** (T-017; via macOS Accessibility) and sends it to Kimi (text, non-thinking) for English polishing. If nothing is selected, it falls back to the current clipboard text.
 - The result appears in the sticky-note popup (creating it if none is open) with: the original, the polished version, and a **copy button**.
 - **The note also shows a feedback box (interactive revision, T-014):** the user can ask for a rewrite (e.g. "语气太生硬", "需要说得更细一点"), the model revises using the original + previous revision history, and each round appears as a new version with its own copy button. Rounds accumulate until the user copies a version they like.
 - Copying puts the polished text on the clipboard; a brief "copied" confirmation shows in the note.
-- If the clipboard is empty or non-text, the note says so and does nothing further.
+- If the clipboard is empty or non-text **and nothing is selected**, the note says so and does nothing further.
 
 **Edge cases:**
 - Text already well-formed → polish returns a lightly touched version (never returns "no changes needed" as a dead end; it still provides a usable copy).
 - Clipboard holds an image → treated as empty-text case with a clear message (image polish is out of scope).
 - Network failure mid-request → error in the note, clipboard untouched (original text preserved).
 - A revision request fails → the feedback stays in the box, an error + retry shows; retry re-sends the same feedback. The polish session never joins the capture thread (context-free stays context-free).
-- A new polish hotkey press starts a fresh session from whatever is now on the clipboard (previous revision history discarded, in-memory only).
+- A new polish hotkey press starts a fresh session from whatever is now selected / on the clipboard (previous revision history discarded, in-memory only).
+
+**Edge cases (T-017):**
+- Reading another app's selection requires macOS Accessibility permission: when missing, said-wat shows a dialog (once, mirroring the Screen Recording flow) explaining how to enable it in System Settings → Privacy & Security → Accessibility, and keeps the clipboard path working.
+- The simulated-Cmd+C fallback (apps that don't expose the AX attribute) briefly replaces the clipboard; the previous text/image is restored before the request starts.
 
 ### Story 7 — Flow B: Chinese intent → judged translation {#story-7-flow-b}
 
@@ -231,6 +235,8 @@ As the user, I want to pick any mainstream model provider in Settings and paste 
 - **Cross-platform** — macOS only.
 
 ## Changelog
+
+- **1.4 (2026-08-18):** Story 6 — Flow A source is now the selected text first, clipboard fallback (T-017). §6 hotkey line updated.
 
 - **1.3 (2026-08-10):** Story 10 — multi-provider model support recorded as a draft (not implemented; T-015 backlog, 4 open decisions pending builder sign-off). §8 multi-provider exclusion removed.
 
