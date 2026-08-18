@@ -1,6 +1,6 @@
 {
   "name": "said-wat",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "said-wat — macOS menu-bar LLM companion: screenshot interpretation + English drafting workspace",
   "author": "Jasen Pan",
   "type": "module",
